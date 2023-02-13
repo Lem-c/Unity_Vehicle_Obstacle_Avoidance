@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace ActionManager
@@ -10,122 +11,213 @@ namespace ActionManager
         private GameObject Target;           // The main vehicle
         private int DetectiveLayer;          // The target layer where obstacles located
         private float RayMaxDistance;
+        private int SideVisualAngle;
 
+        private float StraightBias = 1.5f;     // Normally the distance estimated ahead is further 
+        private bool isTurning = false;
 
-        public MovementController(GameObject _target)
+        // Equipment List
+        LidarDetector leftRadar;
+        LidarDetector rightRadar;
+        LidarDetector cameraMain;
+
+        public MovementController(GameObject _target, float _rayDistance, int _detectiveLayer = 3, int _sideVisualAngle = 20)
         {
             if (_target == null)
             {
                 throw new ArgumentException("Null object reference");
             }
 
-
             Target = _target;
-            DetectiveLayer = 1 << 3;
-            RayMaxDistance = 10f;
+            DetectiveLayer = 1 << _detectiveLayer;
+            RayMaxDistance = _rayDistance;
+            SideVisualAngle = _sideVisualAngle;
+
+            leftRadar = new LidarDetector(DetectiveLayer, RayMaxDistance, SideVisualAngle);
+            rightRadar = new LidarDetector(DetectiveLayer, RayMaxDistance, SideVisualAngle);
+            cameraMain = new LidarDetector(DetectiveLayer, RayMaxDistance + StraightBias);
         }
 
         /// <summary>
-        /// The movement in 'z'-axis would be made through this method
+        /// The movement in 'front'-axis would be made through this method
         /// Override abs method from 'StepManager
         /// Get estimate distance from self to the obstacle'
         /// </summary>
-        /// <param name="_velocity">Current velocity used to control action and decision</param>
-        public override MoveMent StrightMovementDecisionMaker(float _velocity, float _scale = 1f)
+        public override void StrightMovementDecisionMaker()
         {
             if (Target == null)
             {
                 throw new ArgumentException("Null __Target__ reference");
             }
 
-            // Change default look rang(distance)
-            float rayDistance = RayMaxDistance;
-
             // vague distance measure
-            float fuzzyDIstance;
+            float fuzzyDistance;
 
-
-            RaycastHit hit;
-
-            if (Physics.Raycast(Target.GetComponent<Transform>().position,
-                                   Target.GetComponent<Transform>().TransformDirection(Vector3.forward),
-                                   out hit,
-                                   rayDistance, DetectiveLayer))
+            if (cameraMain.RayDetection(Target.GetComponent<Transform>()))
             {
-                fuzzyDIstance = ObscureDistanceEstimator(hit.distance, 0.5f);
-                var action = BreakPattenSimulation(FuzzyPredictHowClose(fuzzyDIstance));
+                fuzzyDistance = ObscureDistanceEstimator(cameraMain.DistanceTo(), 0.5f);
+                // Add break type actions
+                var action = BreakPattenSimulation(fuzzyDistance);
 
-                if (GetLengthOfRecord() < 20)
+                if (GetLengthOfRecord() < 10 || !isTurning)
                 {
                     AddNewRecord(action);
                 }
 
-                return action;
+                return;
             }
 
-            if (GetLengthOfRecord() < 20)
+            if (!isTurning || IsOneWayOut())
             {
-                AddNewRecord(MoveMent.MoveForward);
-            }
+                leftRadar.RecoverAngle();
+                rightRadar.RecoverAngle();
 
-            return MoveMent.MoveForward;
+                AddNewRecord(MoveMent.MoveForward);
+                return;
+            }
+            else
+            {
+                RefreshRecord();
+            }
         }
 
         /// <summary>
         /// Control the turning decision of the vehicle
         /// </summary>
         /// <returns>Turning movement</returns>
-        public override MoveMent TurningDecisionMaker()
+        public override void TurningDecisionMaker()
         {
             if (Target == null)
             {
                 throw new ArgumentException("Null __Target__ reference");
             }
 
-            // Change default look rang(distance)
-            float rayDistance = RayMaxDistance;
+            float leftDistance = SideDetectResult(leftRadar, -1);
+            float rightDistance = SideDetectResult(rightRadar, 1);
 
-            RaycastHit hit;
+            // Debug.Log(leftDistance + ", " + rightDistance);
 
-            if (Physics.Raycast(Target.GetComponent<Transform>().position,
-                                   Target.GetComponent<Transform>().TransformDirection(Vector3.forward),
-                                   out hit,
-                                   rayDistance, DetectiveLayer))
-            {
-
-                var choice = SectorAreaIntercetDetection(Target.GetComponent<Transform>(),
-                                                     hit.collider.GetComponent<Transform>(),
-                                                     hit.distance);
-
-                // Check whether the turning operation can be do immediately
-                // If can't, clear commands
-                var turningLevel = UnityEngine.Random.Range(2, 6);
-                int counter = 0;
-                if (GetLengthOfRecord() > 6 && GetNextMove() != MoveMent.TurnLeft && GetNextMove() != MoveMent.TurnRight)
-                {
-                    RefreshRecord();
-                }
-
-                while (counter < turningLevel)
-                {
-                    AddNewRecord(TurningPatternSimulation(choice));
-                    counter += 1;
-                }
-
-                return TurningPatternSimulation(choice);
-            }
-
-            AddNewRecord(MoveMent.MoveForward);
-            return MoveMent.MoveForward;
+            TwoPointDecisionMaker(leftDistance, rightDistance);
         }
 
+        /// <summary>
+        /// Dectec the obstacles in left or right side
+        /// </summary>
+        /// <param name="_direction">default as -1 means: left </param>
+        /// <returns>
+        /// If the result is lower than zero,
+        /// it means there is no obstacles, otherwise,
+        /// return the distance form it.
+        /// </returns>
+        private float SideDetectResult(LidarDetector _lidar , int _direction=-1)
+        {
+            // vague distance measure
+            float fuzzyDistance;
+
+            if (_lidar.RangRayDetection(_direction, Target.GetComponent<Transform>()))
+            {
+                fuzzyDistance = ObscureDistanceEstimator(_lidar.DistanceTo(), 0);
+                // Add break type actions
+                /*var action = BreakPattenSimulation(FuzzyPredictHowClose(fuzzyDIstance));*/
+
+                return fuzzyDistance;
+            }
+
+            return -1;
+        }
+
+        private void TwoPointDecisionMaker(float _left, float _right)
+        {
+            if(_left < 0 && _right < 0)
+            {
+                isTurning = false;
+                return;
+            }
+
+            var similar = IsTwoFloatValueSimilar(_left, _right, 0.05f);
+
+            isTurning = true;
+
+            // If obstacle close to right
+            if ( (_left < 0 && _right > 0) ||
+                (!similar && (_left > _right)) )
+            {
+                // Far enough
+                if (FuzzyPredictHowClose(_right) < 3){ return;}
+
+                var turn_action = MoveMent.TurnLeft;
+
+                // A little bit far, whether need to slow down
+                // var break_action = BreakPattenSimulation(_right);
+                // if (FuzzyPredictHowClose(_right) > 3) { AddNewRecord(break_action); }
+
+                rightRadar.ShrinkAngle(10);
+                AddNewRecord(turn_action);
+
+                return;
+            }
+
+            // if obstacle close to left
+            if ( (_right < 0 && _left > 0) || 
+                (!similar && (_left < _right)) )
+            {
+                // Far enough
+                if (FuzzyPredictHowClose(_left) < 3) { return; }
+
+                var turn_action = MoveMent.TurnRight;
+
+                AddNewRecord(turn_action);
+
+                leftRadar.ShrinkAngle(10);
+                return;
+            }
+
+            isTurning = false;
+            // AddNewRecord(MoveMent.MoveForward);
+        }
+
+        private bool IsTwoFloatValueSimilar(float _a, float _b, float _range)
+        {
+            if(_a< 0 || _b < 0) { return false;}
+
+            float _bias = 0.1f;
+            if(_a - _b < _range + _bias)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// check whether one side of vehicle do not has obstacle and can move
+        /// </summary>
+        /// <returns></returns>
+        private bool IsOneWayOut()
+        {
+            float leftDistance = SideDetectResult(leftRadar, -1);
+            float rightDistance = SideDetectResult(rightRadar, 1);
+
+            if(leftDistance < 0 || rightDistance < 0)
+            {
+                return true;
+            }
+
+            if(IsTwoFloatValueSimilar(leftDistance, rightDistance, 1.3f))
+            {
+                return true;
+            }
+
+
+            return false;
+        }
 
         /// <summary>
         /// The simulation of distance prediction
         /// Get the distance that can not be measured directly
         /// </summary>
         /// <param name="_accuDistance">The accurate/incorrect distance</param>
-        /// <param name="_mode">How to trust the distance that offered</param>
+        /// <param name="_mode">How to trust the judgement that offered</param>
         /// <returns>An fuzzy float distance</returns>
         private float ObscureDistanceEstimator(float _accuDistance, float _mode = 1)
         {
@@ -141,7 +233,7 @@ namespace ActionManager
             else
             {
                 // Far range distance estiamtion may more unaccracy
-                _temp = UnityEngine.Random.Range(0.8f, 3f);
+                _temp = UnityEngine.Random.Range(0.8f, 1.7f);
             }
 
             if (UnityEngine.Random.Range(0, 100) < 50)
@@ -164,26 +256,26 @@ namespace ActionManager
         {
             float bias = _bias;
 
-            if (_distance <= 1f)
+            if (_distance <= 0.3 * RayMaxDistance)
             {
                 return 5;
             }
 
-            if (_distance > 1f - bias && _distance < 2f + bias)
+            if (_distance > 0.3*RayMaxDistance - bias && _distance < 0.45*RayMaxDistance + bias)
             {
                 return 4;
             }
 
-            if (_distance > 3f && _distance < 5f - bias)
+            if (_distance > 0.45*RayMaxDistance && _distance < 0.8*RayMaxDistance - bias)
             {
                 return 3;
             }
 
-            if (_distance > 6 - bias && _distance < 9 + bias)
+            if (_distance > 0.8*RayMaxDistance - bias && _distance < 0.95*RayMaxDistance + bias)
             {
                 return 2;
             }
-            else if (_distance <= 10f + bias)
+            else if (_distance >= 0.95*RayMaxDistance + bias)
             {
                 return 1;
             }
@@ -210,18 +302,21 @@ namespace ActionManager
                 case 3:
                     return MoveMent.MoveForward;
                 case 2:
-                    return MoveMent.MoveForward;
-                case 1:
                     if (UnityEngine.Random.Range(0, 100) > 50)
                     {
                         return MoveMent.MoveForward;
                     }
-
+                    else
+                    {
+                        return MoveMent.Wait;
+                    }
+                case 1:
+                    return MoveMent.MoveForward;
+                default:
+                    Debug.LogWarning("There is no case in this pattern");
                     return MoveMent.Wait;
             }
 
-
-            return MoveMent.Wait;
         }
 
 
@@ -233,7 +328,8 @@ namespace ActionManager
         /// <returns>Turning movement pattern</returns>
         private MoveMent TurningPatternSimulation(int _choice)
         {
-            switch(_choice){
+            switch (_choice)
+            {
                 case 0:
                     return MoveMent.MoveForward;
                 case 1:
@@ -241,7 +337,7 @@ namespace ActionManager
                 case 2:
                     return MoveMent.TurnRight;
                 case 3:
-                    if(UnityEngine.Random.Range(0, 100) > 50)
+                    if (UnityEngine.Random.Range(0, 100) > 50)
                     {
                         return MoveMent.TurnRight;
                     }
@@ -252,7 +348,7 @@ namespace ActionManager
         }
 
 
-        /// <summary>
+/*        /// <summary>
         /// Simulate the visual judgement.
         /// Using sector to determain whether close to left ot right
         /// </summary>
@@ -275,7 +371,8 @@ namespace ActionManager
 
             // Get the distance from object to the target
             float distance = _distane;
-            if (distance >= sectorSensitive){
+            if (distance >= sectorSensitive)
+            {
                 return 0;
             }
 
@@ -291,9 +388,9 @@ namespace ActionManager
             Vector3 RightVec = RightPoint - _object.position;
 
             // Assist display
-            /*Debug.DrawLine(_object.position, norVec, Color.red);
+            *//*Debug.DrawLine(_object.position, norVec, Color.red);
             Debug.DrawLine(_object.position, LeftVec, Color.green);
-            Debug.DrawLine(_object.position, RightVec, Color.green);*/
+            Debug.DrawLine(_object.position, RightVec, Color.green);*//*
 
             // Calculate the angle-off difference [whether close to left or right]
             float angleOffLeft = Mathf.Acos(Vector3.Dot(norVec.normalized, LeftVec.normalized)) * Mathf.Rad2Deg;
@@ -301,7 +398,7 @@ namespace ActionManager
 
             float angleDif = angleOffLeft - angleOffRight;
 
-            if(angleDif>-2.5f && angleDif < 5f)
+            if (angleDif > -2.5f && angleDif < 5f)
             {
                 return 3;
             }
@@ -313,6 +410,6 @@ namespace ActionManager
             }
 
             return 2;
-        }
+        }*/
     }
 }

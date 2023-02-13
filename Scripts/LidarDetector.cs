@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LidarDetector
 {
     private RaycastHit hit;
+    private bool isHit = false;
 
     // Setting params
     private int LayerMask { set; get; }
@@ -13,12 +15,15 @@ public class LidarDetector
 
 
     // Changing variables
-    private float angleBias_y;    // The rotation on y-axis
+    private float angleBias_y;    // The rotation on y-axis [Have to greater than zero, rotation angle]
+    private float tempAngle;
 
-    public LidarDetector(int _layer, float _rayDistance)
+    public LidarDetector(int _layer, float _rayDistance, float _sideVisualAngle=0)
     {
-        LayerMask = 1 << _layer;
+        LayerMask = _layer;
         MaxRayDistance = _rayDistance;
+        angleBias_y = _sideVisualAngle;
+        tempAngle = angleBias_y;
     }
 
     /// <summary>
@@ -32,12 +37,25 @@ public class LidarDetector
         if (Physics.Raycast(_target.position,
             _target.TransformDirection(Vector3.forward),
             out hit,
-            MaxRayDistance, LayerMask)){
+            MaxRayDistance, LayerMask))
+        {
 
-            return true;
+            isHit = true;
+            return isHit;
         }
 
+        isHit = false;
         return false;
+    }
+
+    public float DistanceTo()
+    {
+        if (!isHit)
+        {
+            throw new Exception("Trying call null ref of ray distance detective");
+        }
+
+        return hit.distance;
     }
 
     private bool RayDetection(Vector3 _from, Vector3 _direction)
@@ -48,9 +66,11 @@ public class LidarDetector
             MaxRayDistance, LayerMask))
         {
 
+            isHit = true;
             return true;
         }
 
+        isHit = false;
         return false;
     }
 
@@ -60,12 +80,11 @@ public class LidarDetector
     /// The complexity requires improve.
     /// </summary>
     /// <param name="_side">The bias added(turn left or right)</param>
-    /// <param name="_bias">Have to greater than zero, rotation angle</param>
     /// <param name="_target">The tartget object that equipped with ray detector</param>
     /// <returns>Whether deteced the obstacles</returns>
-    public bool RangRayDetection(int _side, int _bias, Transform _target, int _checkTime = 5)
+    public bool RangRayDetection(int _side, Transform _target, int _checkTime = 5)
     {
-        if((_side != -1 && _side != 1) || _bias < 0)
+        if ((_side != -1 && _side != 1) || angleBias_y <= 0)
         {
             throw new ArgumentException("The direction choice or turning bias value is incorrect!");
         }
@@ -74,24 +93,25 @@ public class LidarDetector
         float currentBias = 0;
         float tempBias = 0;
 
+        // The init hit bool
+        bool isDetected = false;
+
         Vector3 tempDirection;
 
-        bool isDetected = false;
         int activateTimes = 0;
 
         while (!isDetected && activateTimes < _checkTime)
         {
             // dynamice change the detected direction
-            if (currentBias < _bias+0.5f)
+            if (currentBias < angleBias_y + 0.5f)
             {
                 currentBias += 1f;
-                tempBias = _side * currentBias * 4;
+                tempBias = _side * currentBias * (angleBias_y / 5);
             }
 
             // Add 'tempBias' to the y-axis
-            tempDirection = new Vector3(_target.position.x + tempBias,
-                                         (_target.position.y),
-                                         _target.position.z + 1);
+            tempDirection = Quaternion.Euler(0, tempBias, 0) *
+                            _target.TransformDirection(Vector3.forward);
 
             isDetected = RayDetection(_target.position, tempDirection);
 
@@ -100,8 +120,22 @@ public class LidarDetector
             activateTimes += 1;
         }
 
-
         return isDetected;
+    }
+
+    public void ShrinkAngle(int _minus)
+    {
+        if(angleBias_y -_minus <= 0)
+        {
+            return;
+        }
+
+        SetYBiasAngle(angleBias_y - _minus);
+    }
+
+    public void RecoverAngle()
+    {
+        angleBias_y = tempAngle;
     }
 
     /// <summary>
@@ -124,5 +158,10 @@ public class LidarDetector
     public float GetYBiasAngle()
     {
         return angleBias_y;
+    }
+
+    public bool GetIsHit()
+    {
+        return isHit;
     }
 }

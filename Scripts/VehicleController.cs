@@ -123,41 +123,6 @@ public abstract class VehicleController : MonoBehaviour
         currentMove = _op;
     }
 
-    // The speed plus probability fuzzy choice maker
-    // Generate an int value as result
-    private int GenerateChoice(float _percentage)
-    {
-        int bias = AssistMethod.GetRandomIntNum(0, 10);
-
-        if(_percentage < 0.05)
-        {
-            return 1;
-        }
-
-        // Fuzzy choices
-        if(bias <= 3 && _percentage <= 0.3)
-        {
-            return 2;
-        }
-
-        if(3 < bias && bias <= 5)
-        {
-            if(_percentage < 0.6)
-            {
-                return 3;
-            }
-
-            return 4;
-        }
-
-        if(_percentage > 0.95 && bias > 6)
-        {
-            return 5;
-        }
-
-        return 0;
-    }
-
     // Return a percentage value
     // Represent a ratio that means how much percent reaching max speed;
     protected float GetSpeedRatio()
@@ -233,6 +198,11 @@ public abstract class VehicleController : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Main metod that can be used to apply actions
+    /// </summary>
+    /// <exception cref="System.Exception">The stepManager has not been init</exception>
     protected void QueueCommandOperation()
     {
         if(stp_ is null)
@@ -243,6 +213,7 @@ public abstract class VehicleController : MonoBehaviour
         if (stp_.IsThereAnyInstructions())
         {
             currentMove = stp_.ProcessNextMove();
+            Debug.Log(currentMove);
             ActionApply();
         }
     }

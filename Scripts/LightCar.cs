@@ -19,7 +19,7 @@ public class LightCar : VehicleController
     void Start()
     {
         Vehicle = GameObject.FindWithTag("Player");
-        stp_ = new MovementController(Vehicle);
+        stp_ = new MovementController(Vehicle, MaxRayDistance);
 
         SetDefaultParam(SelfScale);
     }
@@ -83,12 +83,6 @@ public class LightCar : VehicleController
     /// </summary>
     protected override void DecisionMaker()
     {
-        // Deceleration
-        FuzzyDecelerationChoice(stp_.StrightMovementDecisionMaker(GetCurrentSpeed(), SelfScale), SelfScale);
-        // Turning
-        stp_.TurningDecisionMaker();
-
-        // Execute the operation
-        QueueCommandOperation();
+        throw new System.NotImplementedException();
     }
 }

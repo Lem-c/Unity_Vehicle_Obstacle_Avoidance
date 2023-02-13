@@ -83,8 +83,8 @@ namespace ActionManager
             return false;
         }
 
-        public abstract MoveMent StrightMovementDecisionMaker(float _velocity, float _scale = 1f);
-        public abstract MoveMent TurningDecisionMaker();
+        public abstract void StrightMovementDecisionMaker();
+        public abstract void TurningDecisionMaker();
     }
 
 }
