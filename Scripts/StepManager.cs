@@ -85,6 +85,7 @@ namespace ActionManager
 
         public abstract void StrightMovementDecisionMaker();
         public abstract void TurningDecisionMaker();
+        public abstract bool GetIsForwardBlocked();
     }
 
 }

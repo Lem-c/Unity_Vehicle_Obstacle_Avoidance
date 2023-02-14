@@ -27,6 +27,10 @@ public abstract class VehicleController : MonoBehaviour
     protected GameObject Vehicle;       // Get Vehicle Object
     protected StepManager stp_;         // Main operations distribution class
 
+    // State
+    protected bool isStart_ = true;
+    protected int scene_ = 1;
+
     // The method used to auto set parameters as default value
     protected void SetDefaultParam(float _scale = 1f)
     {
@@ -176,10 +180,17 @@ public abstract class VehicleController : MonoBehaviour
 
         if(currentMove == StepManager.MoveMent.MoveBackward 
             || currentMove == StepManager.MoveMent.Break
-            || currentMove == StepManager.MoveMent.LightBreak
-            || currentMove == StepManager.MoveMent.SlamBreak)
+            || currentMove == StepManager.MoveMent.LightBreak)
         {
             MoveBackward();
+        }
+
+        if(currentMove == StepManager.MoveMent.SlamBreak)
+        {
+            float tempDec = Deceleration;
+            Deceleration *= 4;
+            MoveBackward();
+            Deceleration = tempDec;
         }
 
         if(currentMove == StepManager.MoveMent.TurnLeft)
@@ -213,8 +224,18 @@ public abstract class VehicleController : MonoBehaviour
         if (stp_.IsThereAnyInstructions())
         {
             currentMove = stp_.ProcessNextMove();
-            Debug.Log(currentMove);
+            // Debug.Log(currentMove);
             ActionApply();
         }
+    }
+
+    public void StartSim()
+    {
+        isStart_ = !isStart_;
+    }
+
+    public void SetScene(int _scene)
+    {
+        scene_ = _scene;
     }
 }

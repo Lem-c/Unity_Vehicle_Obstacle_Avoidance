@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 // Import self scripts
 using ActionManager;
+using UnityEngine.SceneManagement;
 
 public class TestVehicle : VehicleController
 {
@@ -11,7 +12,7 @@ public class TestVehicle : VehicleController
     public float BreakMonitor;
 
     // Key device parameters
-    private float MaxRayDistance = 6f;
+    private float MaxRayDistance = 15f;
     private float SpeedScale = 0.1f;
 
     // Start is called before the first frame update
@@ -31,16 +32,31 @@ public class TestVehicle : VehicleController
 
     void FixedUpdate()
     {
-        Operation();
-        DecisionMaker();
+        if (isStart_)
+        {
+            QueueCommandOperation();
+            Operation();
+            DecisionMaker();
+        }
     }
 
     protected override void DecisionMaker()
     {
-        QueueCommandOperation();
-
         stp_.StrightMovementDecisionMaker();
-        stp_.TurningDecisionMaker();
+
+        if (stp_.GetIsForwardBlocked())
+        {
+            stp_.TurningDecisionMaker();
+            return;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.layer == 6) 
+        {
+            SceneManager.LoadScene(scene_);
+        }
     }
 
     protected override void HandBreak()

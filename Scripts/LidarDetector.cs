@@ -39,6 +39,7 @@ public class LidarDetector
             out hit,
             MaxRayDistance, LayerMask))
         {
+            // DrawRay(_target.position, _target.TransformDirection(Vector3.forward), Color.red);
 
             isHit = true;
             return isHit;
@@ -52,7 +53,8 @@ public class LidarDetector
     {
         if (!isHit)
         {
-            throw new Exception("Trying call null ref of ray distance detective");
+            /*throw new Exception("Trying call null ref of ray distance detective");*/
+            return 10f;
         }
 
         return hit.distance;
@@ -90,7 +92,7 @@ public class LidarDetector
         }
 
         // The rotation temporary variables
-        float currentBias = 0;
+        float currentBias = 10f;
         float tempBias = 0;
 
         // The init hit bool
@@ -103,10 +105,10 @@ public class LidarDetector
         while (!isDetected && activateTimes < _checkTime)
         {
             // dynamice change the detected direction
-            if (currentBias < angleBias_y + 0.5f)
+            if (currentBias < angleBias_y + currentBias)
             {
-                currentBias += 1f;
-                tempBias = _side * currentBias * (angleBias_y / 5);
+                currentBias += (angleBias_y / 5);
+                tempBias = _side * currentBias;
             }
 
             // Add 'tempBias' to the y-axis
@@ -115,7 +117,7 @@ public class LidarDetector
 
             isDetected = RayDetection(_target.position, tempDirection);
 
-            DrawRay(_target.position, tempDirection);
+            DrawRay(_target.position, tempDirection, Color.green);
 
             activateTimes += 1;
         }
@@ -143,9 +145,9 @@ public class LidarDetector
     /// </summary>
     /// <param name="_from"></param>
     /// <param name="_direction"></param>
-    private void DrawRay(Vector3 _from, Vector3 _direction)
+    private void DrawRay(Vector3 _from, Vector3 _direction, Color _color)
     {
-        Debug.DrawRay(_from, _direction, Color.red);
+        Debug.DrawRay(_from, _direction, _color);
     }
 
 

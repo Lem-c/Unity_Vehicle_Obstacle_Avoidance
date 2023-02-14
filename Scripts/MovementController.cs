@@ -13,8 +13,9 @@ namespace ActionManager
         private float RayMaxDistance;
         private int SideVisualAngle;
 
-        private float StraightBias = 1.5f;     // Normally the distance estimated ahead is further 
+        private float StraightBias = 7.1f;     // Normally the distance estimated ahead is further 
         private bool isTurning = false;
+        private bool isForwardBlocked = false;
 
         // Equipment List
         LidarDetector leftRadar;
@@ -33,9 +34,12 @@ namespace ActionManager
             RayMaxDistance = _rayDistance;
             SideVisualAngle = _sideVisualAngle;
 
-            leftRadar = new LidarDetector(DetectiveLayer, RayMaxDistance, SideVisualAngle);
-            rightRadar = new LidarDetector(DetectiveLayer, RayMaxDistance, SideVisualAngle);
-            cameraMain = new LidarDetector(DetectiveLayer, RayMaxDistance + StraightBias);
+            leftRadar = new LidarDetector(DetectiveLayer, RayMaxDistance-StraightBias, SideVisualAngle);
+            rightRadar = new LidarDetector(DetectiveLayer, RayMaxDistance-StraightBias, SideVisualAngle);
+            cameraMain = new LidarDetector(DetectiveLayer, RayMaxDistance);
+
+            StrightMovementDecisionMaker();
+            TurningDecisionMaker();
         }
 
         /// <summary>
@@ -55,14 +59,13 @@ namespace ActionManager
 
             if (cameraMain.RayDetection(Target.GetComponent<Transform>()))
             {
+                // Debug.Log("Something String forward!");
+
                 fuzzyDistance = ObscureDistanceEstimator(cameraMain.DistanceTo(), 0.5f);
                 // Add break type actions
                 var action = BreakPattenSimulation(fuzzyDistance);
 
-                if (GetLengthOfRecord() < 10 || !isTurning)
-                {
-                    AddNewRecord(action);
-                }
+                AddNewRecord(action);
 
                 return;
             }
@@ -75,10 +78,7 @@ namespace ActionManager
                 AddNewRecord(MoveMent.MoveForward);
                 return;
             }
-            else
-            {
-                RefreshRecord();
-            }
+            
         }
 
         /// <summary>
@@ -87,6 +87,7 @@ namespace ActionManager
         /// <returns>Turning movement</returns>
         public override void TurningDecisionMaker()
         {
+
             if (Target == null)
             {
                 throw new ArgumentException("Null __Target__ reference");
@@ -95,7 +96,10 @@ namespace ActionManager
             float leftDistance = SideDetectResult(leftRadar, -1);
             float rightDistance = SideDetectResult(rightRadar, 1);
 
-            // Debug.Log(leftDistance + ", " + rightDistance);
+            if(GetLengthOfRecord() > 3)
+            {
+                RefreshRecord();
+            }
 
             TwoPointDecisionMaker(leftDistance, rightDistance);
         }
@@ -130,6 +134,12 @@ namespace ActionManager
         {
             if(_left < 0 && _right < 0)
             {
+                if(GetIsForwardBlocked())
+                {
+                    RandomTurnning();
+                    return;
+                }
+
                 isTurning = false;
                 return;
             }
@@ -140,7 +150,7 @@ namespace ActionManager
 
             // If obstacle close to right
             if ( (_left < 0 && _right > 0) ||
-                (!similar && (_left > _right)) )
+                (!similar && (_left > _right) && _right > 0) )
             {
                 // Far enough
                 if (FuzzyPredictHowClose(_right) < 3){ return;}
@@ -150,25 +160,26 @@ namespace ActionManager
                 // A little bit far, whether need to slow down
                 // var break_action = BreakPattenSimulation(_right);
                 // if (FuzzyPredictHowClose(_right) > 3) { AddNewRecord(break_action); }
-
                 rightRadar.ShrinkAngle(10);
                 AddNewRecord(turn_action);
+                AddNewRecord(MoveMent.MoveForward);
 
                 return;
             }
 
             // if obstacle close to left
             if ( (_right < 0 && _left > 0) || 
-                (!similar && (_left < _right)) )
+                (!similar && (_left < _right) && _left > 0) )
             {
                 // Far enough
                 if (FuzzyPredictHowClose(_left) < 3) { return; }
 
                 var turn_action = MoveMent.TurnRight;
 
-                AddNewRecord(turn_action);
-
                 leftRadar.ShrinkAngle(10);
+                AddNewRecord(turn_action);
+                AddNewRecord(MoveMent.MoveForward);
+
                 return;
             }
 
@@ -347,6 +358,37 @@ namespace ActionManager
             return MoveMent.Wait;
         }
 
+
+        public override bool GetIsForwardBlocked()
+        {
+            isForwardBlocked = false;
+
+
+            if (FuzzyPredictHowClose(leftRadar.DistanceTo())>4 ||
+                FuzzyPredictHowClose(rightRadar.DistanceTo())>4 ||
+                FuzzyPredictHowClose(cameraMain.DistanceTo())>3){
+
+                isForwardBlocked = true;
+
+            }
+
+            return isForwardBlocked;
+        }
+
+        private void RandomTurnning()
+        {
+            isTurning = true;
+
+            var choice = UnityEngine.Random.Range(0,100);
+
+            if(choice < 60)
+            {
+                AddNewRecord(MoveMent.TurnLeft);
+                return;
+            }
+
+            AddNewRecord(MoveMent.TurnRight);
+        }
 
 /*        /// <summary>
         /// Simulate the visual judgement.
