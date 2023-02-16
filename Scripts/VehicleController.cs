@@ -28,8 +28,9 @@ public abstract class VehicleController : MonoBehaviour
     protected StepManager stp_;         // Main operations distribution class
 
     // State
-    protected bool isStart_ = true;
+    protected bool isStart_ = false;
     protected int scene_ = 1;
+    private float SpeedScale = 0.1f;
 
     // The method used to auto set parameters as default value
     protected void SetDefaultParam(float _scale = 1f)
@@ -43,7 +44,7 @@ public abstract class VehicleController : MonoBehaviour
 
     // Moving control methods
 
-    protected void MoveForawrd()
+        protected void MoveForawrd()
     {
         if(currentSpeed >= MaxSpeed)
         {
@@ -224,7 +225,7 @@ public abstract class VehicleController : MonoBehaviour
         if (stp_.IsThereAnyInstructions())
         {
             currentMove = stp_.ProcessNextMove();
-            // Debug.Log(currentMove);
+            Debug.Log(currentMove);
             ActionApply();
         }
     }
@@ -237,5 +238,27 @@ public abstract class VehicleController : MonoBehaviour
     public void SetScene(int _scene)
     {
         scene_ = _scene;
+    }
+
+    public void SetScale(float _value)
+    {
+        SpeedScale = _value;
+    }
+
+    public void StartPosition(float _x=0.5f, float _z=-5.2f)
+    {
+        if(Vehicle is null)
+        {
+            throw new System.Exception("Empty Vehilce!");
+        }
+
+        Transform tempTrans = Vehicle.GetComponent<Transform>();
+        Vector3 tempPos = new Vector3(_x, tempTrans.position.y, _z);
+
+        Vehicle.GetComponent<Transform>().position = tempPos;
+    }
+
+    protected float GetSpeedScale(){
+        return SpeedScale;
     }
 }

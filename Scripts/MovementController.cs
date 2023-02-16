@@ -267,17 +267,17 @@ namespace ActionManager
         {
             float bias = _bias;
 
-            if (_distance <= 0.3 * RayMaxDistance)
+            if (_distance <= 0.2 * RayMaxDistance)
             {
                 return 5;
             }
 
-            if (_distance > 0.3*RayMaxDistance - bias && _distance < 0.45*RayMaxDistance + bias)
+            if (_distance > 0.2*RayMaxDistance - bias && _distance <= 0.35*RayMaxDistance + bias)
             {
                 return 4;
             }
 
-            if (_distance > 0.45*RayMaxDistance && _distance < 0.8*RayMaxDistance - bias)
+            if (_distance > 0.35*RayMaxDistance && _distance <= 0.8*RayMaxDistance - bias)
             {
                 return 3;
             }
@@ -362,7 +362,6 @@ namespace ActionManager
         public override bool GetIsForwardBlocked()
         {
             isForwardBlocked = false;
-
 
             if (FuzzyPredictHowClose(leftRadar.DistanceTo())>4 ||
                 FuzzyPredictHowClose(rightRadar.DistanceTo())>4 ||

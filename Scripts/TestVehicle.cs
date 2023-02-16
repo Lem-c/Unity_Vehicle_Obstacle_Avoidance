@@ -13,21 +13,30 @@ public class TestVehicle : VehicleController
 
     // Key device parameters
     private float MaxRayDistance = 15f;
-    private float SpeedScale = 0.1f;
+
+    // Temp value saver
+    private float tempScale;
 
     // Start is called before the first frame update
     void Start()
     {
         Vehicle = GameObject.FindWithTag("Player");
 
-        stp_ = new MovementController(Vehicle, MaxRayDistance, 3, 30);
-        SetDefaultParam(SpeedScale);
+        stp_ = new MovementController(Vehicle, MaxRayDistance, 3, 28);
+        SetDefaultParam(GetSpeedScale());
+        tempScale = GetSpeedScale();
     }
 
     void Update()
     {
         SpeedMonitor = GetCurrentSpeed();
         BreakMonitor = GetCurrentDeceleration();
+
+        if(tempScale != GetSpeedScale())
+        {
+            tempScale= GetSpeedScale();
+            SetDefaultParam(GetSpeedScale());
+        }
     }
 
     void FixedUpdate()
@@ -44,7 +53,7 @@ public class TestVehicle : VehicleController
     {
         stp_.StrightMovementDecisionMaker();
 
-        if (stp_.GetIsForwardBlocked())
+        if (stp_.GetIsForwardBlocked() || Random.Range(0,100)<50)
         {
             stp_.TurningDecisionMaker();
             return;
