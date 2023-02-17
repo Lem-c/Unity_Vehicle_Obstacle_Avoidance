@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
-using Wingman;
 using ActionManager;
 
 public abstract class VehicleController : MonoBehaviour
@@ -14,23 +10,21 @@ public abstract class VehicleController : MonoBehaviour
     protected float Deceleration;
     protected float ReverseAcceleration;
 
-    // The physical params
+    /*// The physical params
     private float Friction = 1.2f;
-    private float Gravity = 10f;
+    private float Gravity = 10f;*/
 
     // The real-time params
     private float currentSpeed = 0;     // The current speed of vehicle
     private float turnAngle;
-    private StepManager.MoveMent currentMove;
+    private MovementStep.MoveMent currentMove;  // Current operation
 
-    // Class ref
+    // In-game object reference
     protected GameObject Vehicle;       // Get Vehicle Object
-    protected StepManager stp_;         // Main operations distribution class
+    protected VecicleDecisionProcess vdp;         // Logic process model
 
-    // State
-    protected bool isStart_ = false;
-    protected int scene_ = 1;
-    private float SpeedScale = 0.1f;
+    // State of vehicle
+    protected bool isStart_ = true;
 
     // The method used to auto set parameters as default value
     protected void SetDefaultParam(float _scale = 1f)
@@ -42,9 +36,13 @@ public abstract class VehicleController : MonoBehaviour
         ReverseAcceleration = 1.5f * _scale;
     }
 
-    // Moving control methods
+    /***********************Abstact methods*************/
+    protected abstract void HandBreak();
+    protected abstract void ProcessDecision();
 
-        protected void MoveForawrd()
+
+    /************Moving control methods*****************/
+    protected void MoveForawrd()
     {
         if(currentSpeed >= MaxSpeed)
         {
@@ -63,7 +61,6 @@ public abstract class VehicleController : MonoBehaviour
 
         currentSpeed -= Time.deltaTime * Deceleration;
     }
-
     protected void TurnLeft()
     {
         turnAngle = -1 * 60f * Time.deltaTime;
@@ -85,29 +82,67 @@ public abstract class VehicleController : MonoBehaviour
 
         currentSpeed -= Time.deltaTime * ReverseAcceleration;
     }
-
-    protected void SimulateFriction()
-    {
-        currentSpeed -= Time.deltaTime * Friction;
-    }
     
-    // Abstact methods
-    protected abstract void HandBreak();
-    protected abstract void DecisionMaker();
-
-
-    // The main operation control the transformer to move
+    /***The main operation control the transformer to move***/
     protected void Operation()
     {
-        transform.Translate(Vector3.forward * GetCurrentSpeed() * Time.deltaTime);
+        if (isStart_)
+        {
+            transform.Translate(Vector3.forward * GetCurrentSpeed() * Time.deltaTime);
+        }
     }
 
-    // Value change methods
-    protected void SetGravityOfVehicle(float _g)
+    protected void QueueCommandOperation()
     {
-        Gravity = _g;
+        if (vdp is null)
+        {
+            throw new System.Exception("Null step manager: VecicleDecisionProcess");
+        }
+
+        if (vdp.stepManager.GetLengthOfRecord() > 0)
+        {
+            currentMove = vdp.stepManager.PopNextMove();
+            // Debug.Log(currentMove);
+            ActionApply();
+        }
     }
 
+    /// <summary>
+    /// Method used with 'Operation()' 
+    /// Guide vehilce movement by selecting actions
+    /// </summary>
+    private void ActionApply()
+    {
+        if (currentMove == MovementStep.MoveMent.MoveForward)
+        {
+            MoveForawrd();
+        }
+
+        if (currentMove == MovementStep.MoveMent.MoveBackward
+            || currentMove == MovementStep.MoveMent.Break
+            || currentMove == MovementStep.MoveMent.LightBreak
+            || currentMove == MovementStep.MoveMent.SlamBreak)
+        {
+            MoveBackward();
+        }
+
+        if (currentMove == MovementStep.MoveMent.TurnLeft)
+        {
+            TurnLeft();
+        }
+
+        if (currentMove == MovementStep.MoveMent.TurnRight)
+        {
+            TurnRight();
+        }
+
+        if (currentMove == MovementStep.MoveMent.Wait)
+        {
+            // When no operation
+        }
+    }
+
+    /***************Value change/Get methods****************/
     protected void ChangeCurrentSpeed(float _new)
     {
         currentSpeed = _new;
@@ -123,11 +158,6 @@ public abstract class VehicleController : MonoBehaviour
         return Deceleration;
     }
 
-    protected void ChangeCurrentMoveOperation(StepManager.MoveMent _op)
-    {
-        currentMove = _op;
-    }
-
     // Return a percentage value
     // Represent a ratio that means how much percent reaching max speed;
     protected float GetSpeedRatio()
@@ -140,125 +170,8 @@ public abstract class VehicleController : MonoBehaviour
         return currentSpeed / MaxSpeed * 1f;
     }
 
-    // The method choose a resonable deceleration value
-    // The _percentage means the rate approaching the upper speed limit
-    // Simulate different strength
-    protected void FuzzyDecelerationChoice(StepManager.MoveMent situation, float _scale = 1f)
-    {
-        if(stp_ == null)
-        {
-            return;
-        }
-
-        ChangeCurrentMoveOperation(situation);
-
-        switch (situation)
-        {
-            case StepManager.MoveMent.LightBreak:
-                Deceleration = 1f* _scale + Random.Range(0f, 0.3f)*Random.Range(-1, 1);
-                break;
-            case StepManager.MoveMent.Break:
-                Deceleration = 2f* _scale + Random.Range(0f, 0.3f)*Random.Range(-1, 1);
-                break;
-            case StepManager.MoveMent.SlamBreak:
-                Deceleration = 4.8f* _scale + Random.Range(0f, 0.3f)*Random.Range(-1, 1);
-                break;
-            default:
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Method used with 'Operation()' 
-    /// Guide vehilce movement
-    /// </summary>
-    private void ActionApply()
-    {
-        if(currentMove == StepManager.MoveMent.MoveForward)
-        {
-            MoveForawrd();
-        }
-
-        if(currentMove == StepManager.MoveMent.MoveBackward 
-            || currentMove == StepManager.MoveMent.Break
-            || currentMove == StepManager.MoveMent.LightBreak)
-        {
-            MoveBackward();
-        }
-
-        if(currentMove == StepManager.MoveMent.SlamBreak)
-        {
-            float tempDec = Deceleration;
-            Deceleration *= 4;
-            MoveBackward();
-            Deceleration = tempDec;
-        }
-
-        if(currentMove == StepManager.MoveMent.TurnLeft)
-        {
-            TurnLeft();
-        }
-
-        if(currentMove == StepManager.MoveMent.TurnRight)
-        {
-            TurnRight();
-        }
-
-        if(currentMove == StepManager.MoveMent.Wait)
-        {
-            // When no operation
-        }
-    }
-
-
-    /// <summary>
-    /// Main metod that can be used to apply actions
-    /// </summary>
-    /// <exception cref="System.Exception">The stepManager has not been init</exception>
-    protected void QueueCommandOperation()
-    {
-        if(stp_ is null)
-        {
-            throw new System.Exception("Null step manager");
-        }
-
-        if (stp_.IsThereAnyInstructions())
-        {
-            currentMove = stp_.ProcessNextMove();
-            Debug.Log(currentMove);
-            ActionApply();
-        }
-    }
-
-    public void StartSim()
+    protected void ChangeStartState()
     {
         isStart_ = !isStart_;
-    }
-
-    public void SetScene(int _scene)
-    {
-        scene_ = _scene;
-    }
-
-    public void SetScale(float _value)
-    {
-        SpeedScale = _value;
-    }
-
-    public void StartPosition(float _x=0.5f, float _z=-5.2f)
-    {
-        if(Vehicle is null)
-        {
-            throw new System.Exception("Empty Vehilce!");
-        }
-
-        Transform tempTrans = Vehicle.GetComponent<Transform>();
-        Vector3 tempPos = new Vector3(_x, tempTrans.position.y, _z);
-
-        Vehicle.GetComponent<Transform>().position = tempPos;
-    }
-
-    protected float GetSpeedScale(){
-        return SpeedScale;
     }
 }
