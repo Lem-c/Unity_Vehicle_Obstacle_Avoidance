@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace DecisionMake
 {
@@ -29,6 +28,7 @@ namespace DecisionMake
         public FuzzyDecisionMaker(float _maxSpeed, float _maxDistance)
         {
             speedUpperBound = _maxSpeed;
+
             distanceUpperBound = _maxDistance;
         }
 
@@ -112,15 +112,14 @@ namespace DecisionMake
 
             if(_speed < 0)
             {
-                return 0;
+                return 10*speedUpperBound;
             }
 
-            if(_speed + misJudge < 0.3f * speedUpperBound)
+            if(_speed + misJudge < (0.3f * speedUpperBound))
             {
-
-                return (1f - _speed / (0.3f*speedUpperBound));
+                return (_speed / (0.3f*speedUpperBound));
             }
-            else if(_speed + misJudge > 0.7f * speedUpperBound)
+            else if(_speed + misJudge > (0.7f * speedUpperBound))
             {
                 return _speed / speedUpperBound;
             }
@@ -144,7 +143,7 @@ namespace DecisionMake
             if (_dist + misJudge < 0.25f * distanceUpperBound)
             {
 
-                return (1f - _dist / (0.25f * distanceUpperBound));
+                return (_dist / (0.25f * distanceUpperBound));
             }
             else if (_dist + misJudge > 0.75f * distanceUpperBound)
             {
@@ -257,8 +256,13 @@ namespace DecisionMake
             
             var strengthSum = currentSpeed.probability + currentCondition.probability;
 
+            if(strengthSum <= 0)
+            {
+                strengthSum = -1;
+            }
+
             // Debug.Log(currentSpeed.probability + ", " + currentCondition.probability);
-            Debug.Log(fireStrength / strengthSum);
+            // Debug.Log(fireStrength / strengthSum);
 
             return fireStrength / strengthSum;
         }

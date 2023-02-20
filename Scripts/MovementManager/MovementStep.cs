@@ -39,12 +39,11 @@ namespace ActionManager
         protected float RayMaxDistance;        // The maximum distance that radar can ditected
         protected int SideVisualAngle;         // The range of left/right radar could reach(If equipped)
         protected float StraightBias = 7.1f;   // Normally the distance estimated ahead is longer 
-        protected bool isTurning = false;      // Whether next step is turning
         protected bool isForwardBlocked = false;// True if forward is blocked by pbstacle
 
         /***********Methods Interface************/
         public abstract void StrightMovementDecisionMaker(float _speed, float _dist);
-        public abstract void TurningDecisionMaker(float _leftDis, float _rightDis, bool _isForwardblocked);
+        public abstract void TurningDecisionMaker(float _speed, float _leftDis, float _rightDis, bool _isForwardblocked);
 
         /***********Value Get/Set Methods*********/
         // Return current estimated next action
@@ -56,6 +55,12 @@ namespace ActionManager
         // Add a new action to the record list
         protected void AddNewRecord(MoveMent _step)
         {
+            if (GetLengthOfRecord() > 3)
+            {
+                RefreshRecord();
+                return;
+            }
+
             RecordSteps.Add(_step);
         }
 
@@ -109,7 +114,8 @@ namespace ActionManager
         }
 
         /// <summary>
-        /// check whether one side of vehicle do not has obstacle and can move
+        /// Check whether one side of vehicle do not has obstacle and can move
+        /// Side: left / right
         /// </summary>
         /// <returns>Ture if there is a path lead to no obstacle</returns>
         public static bool IsOneSideNotBlocked(float leftDistance, float rightDistance)
@@ -119,13 +125,33 @@ namespace ActionManager
                 return true;
             }
 
-            if (SmoothMovement.IsTwoFloatValueSimilar(leftDistance, rightDistance, 1.3f))
+            if (!SmoothMovement.IsTwoFloatValueSimilar(leftDistance, rightDistance, 0.3f))
             {
                 return true;
             }
 
 
             return false;
+        }
+
+        /// <summary>
+        /// Random choose direction to turn
+        /// Add action into list
+        /// Prefer to turn left
+        /// </summary>
+        /// <param name="_bias">Using this value to control turning direction</param>
+        public void RandomTurning(int _bias=0)
+        {
+
+            var choice = UnityEngine.Random.Range(0, 100);
+
+            if (choice+ _bias < 60)
+            {
+                AddNewRecord(MoveMent.TurnLeft);
+                return;
+            }
+
+            AddNewRecord(MoveMent.TurnRight);
         }
     }
 }

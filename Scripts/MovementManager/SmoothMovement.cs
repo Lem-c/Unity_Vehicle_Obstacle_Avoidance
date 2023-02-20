@@ -1,5 +1,6 @@
 using DecisionMake;
 using System;
+using UnityEngine;
 using static DecisionMake.DecisionMaker;
 
 namespace ActionManager
@@ -35,16 +36,23 @@ namespace ActionManager
             Situation state = fdm.GetFuzzyResult(_speed, _dist);
 
             // Add new action to the action-list
-            AddNewRecord( BreakPattenSimulation(state) );
+            AddNewRecord(BreakPattenSimulation(state));
         }
 
-        public override void TurningDecisionMaker(float _leftDis, float _rightDis, bool _isForwardblocked)
+        public override void TurningDecisionMaker(float _speed, float _leftDis, float _rightDis, bool _isForwardblocked)
         {
-            SideSituationJudgement(_leftDis, _rightDis, _isForwardblocked);
+            Situation leftState = fdm.GetFuzzyResult(_speed, _leftDis, 2.1f+MaxDecisionBias* UnityEngine.Random.Range(-1,2));
+            Situation rightState = fdm.GetFuzzyResult(_speed, _rightDis, 2.1f+MaxDecisionBias * UnityEngine.Random.Range(-1, 2));
+
+            // Save two side situation into array | No safe check
+            Situation[] stateList = { rightState, leftState };
+            // Debug.Log(stateList[0] + ", " + stateList[1]);
+
+            SideSituationJudgement(stateList, _leftDis, _rightDis, _isForwardblocked);
         }
 
         /***********************Assit Methods**********************/
-        /// <summary>
+        /// <summary>   
         /// Intialize the fuzzy object
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
@@ -52,9 +60,15 @@ namespace ActionManager
         {
             fdm = new FuzzyDecisionMaker(_maxSpeed, _MaxRayDistance);
 
-            float[] _tempWieght = { 0.5f, 3.25f, 8.35f, 2.5f, 5f, 10f };
+            float[] _tempWieght = { 0.5f, 2.25f, 5.35f, 2.5f, 5f, 10f };
             fdm.SetWieghtList(_tempWieght);
         }
+
+        /// <summary>
+        /// Load existed fuzzy class from external
+        /// </summary>
+        /// <param name="_fdm">The special fuzzy class</param>
+        /// <exception cref="ArgumentException">Load null fuzzy module</exception>
         public void LoadFuzzyChip(FuzzyDecisionMaker _fdm)
         {
             fdm = _fdm;
@@ -65,66 +79,64 @@ namespace ActionManager
             }
         }
 
-        private void SideSituationJudgement(float _left, float _right, bool _isForawadBlocked)
+        /// <summary>
+        /// Determine current safty level accroding to the distance to left/right
+        /// And make judgement from states array
+        /// </summary>
+        /// <param name="_states">
+        /// Array saves states, contain two elements.
+        /// First one is right, and another one is left side.
+        /// </param>
+        /// <param name="_left">Distance to the left side obstacle</param>
+        /// <param name="_right">Distance to the right side obstacle</param>
+        /// <param name="_isForawadBlocked">Bool velue</param>
+        private void SideSituationJudgement(Situation[] _states, float _left, float _right, bool _isForawadBlocked)
         {
-            if(_left < 0 && _right < 0)
+            // Check whether no obstacles or two sides hvae been blocked
+            // Avoid to make mis-judgement
+            var canTurning = IsOneSideNotBlocked(_left, _right);
+
+            if ( (_left < 0 && _right < 0))
             {
-                if (_isForawadBlocked)
+                if (_isForawadBlocked && canTurning)
                 {
                     RandomTurning();
                     return;
                 }
-            }
 
-            isTurning = true;           // Going to turn
-            // Check whether two distances are similar
-            // Avoid to make mis-judgement
-            var isDisSimilar = IsTwoFloatValueSimilar(_left, _right, MaxDecisionBias);
+                if (GetLengthOfRecord() < 3)
+                {
+                    AddNewRecord(MoveMent.MoveForward);
+                    return;
+                }
+
+                return;
+            }
 
             // Direction Determine
             if( (_left<0 && _right>0) || 
-                (!isDisSimilar && (_left > _right) && _right > 0))
+                (canTurning && (_left > _right) && _right > 0))
             {
+                if (_states[0] != Situation.Dangerous) return;
+
                 // Right lidar found obstacle
-                var turn_action = MoveMent.TurnLeft;
-                AddNewRecord(turn_action);
-                AddNewRecord(MoveMent.MoveForward);
+                AddNewRecord(MoveMent.TurnLeft);
+                AddNewRecord(MoveMent.TurnLeft);
 
                 return;
             }
 
             if ((_right < 0 && _left > 0) ||
-                (!isDisSimilar && (_left < _right) && _left > 0))
+                (canTurning && (_left < _right) && _left > 0))
             {
+                if (_states[1] != Situation.Dangerous) return;
+
                 // Left lidar found obstacle
-                var turn_action = MoveMent.TurnRight;
-                AddNewRecord(turn_action);
-                AddNewRecord(MoveMent.MoveForward);
+                AddNewRecord(MoveMent.TurnRight);
+                AddNewRecord(MoveMent.TurnRight);
 
                 return;
             }
-
-            isTurning = false;
-        }
-
-        /// <summary>
-        /// Random choose direction to turn
-        /// Add action into list
-        /// Prefer to turn left
-        /// </summary>
-        private void RandomTurning()
-        {
-            isTurning = true;
-
-            var choice = UnityEngine.Random.Range(0, 100);
-
-            if (choice < 60)
-            {
-                AddNewRecord(MoveMent.TurnLeft);
-                return;
-            }
-
-            AddNewRecord(MoveMent.TurnRight);
         }
 
         /// <summary>
@@ -138,7 +150,7 @@ namespace ActionManager
         {
             if (_a < 0 || _b < 0) { return false; }
 
-            float _bias = 0.1f;
+            float _bias = 0.01f;
             if (_a - _b < _range + _bias)
             {
                 return true;

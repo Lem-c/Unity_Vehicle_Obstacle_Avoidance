@@ -3,7 +3,7 @@ using DecisionMake;
 using UnityEngine;
 using VehicleEqipment.Lidar;
 
-public class VecicleDecisionProcess
+public class VecicleDecisionPlatform
 {
     // The target game object in unity
     private GameObject Target;
@@ -12,7 +12,7 @@ public class VecicleDecisionProcess
     // Main Decision determination model
     public MovementStep stepManager;
 
-    public VecicleDecisionProcess(GameObject _car, int _layer, float _maxSpeed=20f, float _MaxRayDistance=15f)
+    public VecicleDecisionPlatform(GameObject _car, int _layer, float _maxSpeed, float _MaxRayDistance)
     {
         Target = _car;
         motherBoard = new VehicleHardWare(Target, _MaxRayDistance, _layer);
@@ -20,6 +20,9 @@ public class VecicleDecisionProcess
     }
 
     /************All Initialize/decision making methods***************/
+    /// <summary>
+    /// Generate straight-movement operations using sensors data from mother board
+    /// </summary>
     public void GenerateStraightMovement()
     {
         // Process lidar detection first
@@ -28,15 +31,31 @@ public class VecicleDecisionProcess
         stepManager.StrightMovementDecisionMaker(
                     Target.GetComponent<LightCar>().Speed,
                     motherBoard.DistanceToObstacle());
+
+        /*// If meet wall
+        if(motherBoard.WhetherNeedTurning())
+        {
+            if(motherBoard.LeftLidarDetectation())
+            {
+                stepManager.RandomTurning(60);
+                return;
+            }
+
+            stepManager.RandomTurning(-60);
+        }*/
     }
 
+    /// <summary>
+    /// Generate turning operations using sensors data from mother board
+    /// </summary>
     public void GenerateTurningMovement()
     {
         // Process lidar detection first
         motherBoard.LeftLidarDetectation();
         motherBoard.RightLidarDetectation();
 
-        stepManager.TurningDecisionMaker(motherBoard.DistanceToObstacle(2),
+        stepManager.TurningDecisionMaker(Target.GetComponent<LightCar>().Speed,
+                                         motherBoard.DistanceToObstacle(2),
                                          motherBoard.DistanceToObstacle(3),
                                          motherBoard.GetIsForwardBlocked());
     }

@@ -18,11 +18,6 @@ public class VehicleHardWare
     LidarDetector LeftLidar;
     LidarDetector RightLidar;
 
-    /// <summary>
-    /// Hardwasre list
-    /// </summary>
-    ArrayList equipmentList = new();
-
 
     public VehicleHardWare(GameObject _target, float _rayDistance, int _detectiveLayer)
     {
@@ -38,23 +33,29 @@ public class VehicleHardWare
         StrightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance);
         LeftLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
         RightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
-
-        equipmentList.Add(StrightLidar);
     }
 
     public bool StraightLidarDetctation()
     {
-        return StrightLidar.RayDetection(Target.GetComponent<Transform>());
+        var isBlocked = StrightLidar.RayDetection(Target.GetComponent<Transform>());
+        RecoverLidarAngle();
+        return isBlocked;
     }
 
     public bool LeftLidarDetectation()
     {
-        return LeftLidar.RangRayDetection(Target.GetComponent<Transform>(), -1);
+        var isBlocked = LeftLidar.RangRayDetection(Target.GetComponent<Transform>(), -1);
+        LeftLidar.ShrinkAngle(10);
+
+        return isBlocked;
     }
 
     public bool RightLidarDetectation()
     {
-        return RightLidar.RangRayDetection(Target.GetComponent<Transform>(), 1);
+        var isBlocked = RightLidar.RangRayDetection(Target.GetComponent<Transform>(), 1);
+        RightLidar.ShrinkAngle(10);
+
+        return isBlocked;
     }
 
     public float DistanceToObstacle(int _type=1)
@@ -73,11 +74,6 @@ public class VehicleHardWare
         }
     }
 
-    public void AddNewEquipment(Detector _new)
-    {
-        equipmentList.Add(_new);
-    }
-
     /// <summary>
     /// Return radar detected result
     /// Whether there is obstacle in front of.
@@ -87,10 +83,34 @@ public class VehicleHardWare
     {
         if (StrightLidar.RayDetection(Target.GetComponent<Transform>()))
         {
-            return true;
+            if(StrightLidar.DistanceTo() <= 0.25f * RayMaxDistance)
+            {
+                return true;
+            }
+            return false;
         }
 
         return false;
     }
 
+    public void RecoverLidarAngle()
+    {
+        LeftLidar.RecoverAngle();
+        RightLidar.RecoverAngle();
+    }
+
+    /*public bool WhetherNeedTurning()
+    {
+        if(!GetIsForwardBlocked())
+        {
+            return false;
+        }
+
+        if(LeftLidar.DistanceTo()<0 || RightLidar.DistanceTo() < 0)
+        {
+            return true;
+        }
+
+        return false;
+    }*/
 }

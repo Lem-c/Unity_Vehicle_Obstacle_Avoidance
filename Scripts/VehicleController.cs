@@ -21,10 +21,11 @@ public abstract class VehicleController : MonoBehaviour
 
     // In-game object reference
     protected GameObject Vehicle;       // Get Vehicle Object
-    protected VecicleDecisionProcess vdp;         // Logic process model
+    protected VecicleDecisionPlatform vdp;         // Logic process model
 
     // State of vehicle
-    protected bool isStart_ = true;
+    protected bool isStart_ = false;
+    protected float SelfScale = 0.1f;
 
     // The method used to auto set parameters as default value
     protected void SetDefaultParam(float _scale = 1f)
@@ -102,7 +103,7 @@ public abstract class VehicleController : MonoBehaviour
         if (vdp.stepManager.GetLengthOfRecord() > 0)
         {
             currentMove = vdp.stepManager.PopNextMove();
-            // Debug.Log(currentMove);
+            Debug.Log(currentMove);
             ActionApply();
         }
     }
@@ -170,8 +171,20 @@ public abstract class VehicleController : MonoBehaviour
         return currentSpeed / MaxSpeed * 1f;
     }
 
-    protected void ChangeStartState()
+    public void ChangeStartState()
     {
         isStart_ = !isStart_;
+    }
+    public void ChangeStartPosition(float _x = 0.5f, float _z = -5.2f)
+    {
+        if (Vehicle is null)
+        {
+            throw new System.Exception("Empty Vehilce!");
+        }
+
+        Transform tempTrans = Vehicle.GetComponent<Transform>();
+        Vector3 tempPos = new Vector3(_x, tempTrans.position.y, _z);
+
+        Vehicle.GetComponent<Transform>().position = tempPos;
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using ActionManager;
+using UnityEngine.SceneManagement;
 
 public class LightCar : VehicleController
 {
@@ -8,8 +9,7 @@ public class LightCar : VehicleController
     public float nowBreak;
 
     // Key device params
-    private readonly float MaxRayDistance = 15f;
-    private float SelfScale = 0.3f;
+    private readonly float MaxRayDistance = 13f;
 
 
     /******************Unity methods************************/
@@ -17,16 +17,21 @@ public class LightCar : VehicleController
     void Start()
     {
         Vehicle = GameObject.FindWithTag("Player");
-        vdp = new VecicleDecisionProcess(Vehicle, 3, MaxSpeed, MaxRayDistance);
         
         SetDefaultParam(SelfScale);
+        // TODO: When updating 'LightCar' using method: SetDefaultParam,
+        // MaxSpeed.. in vdp class would not update correspondingly
+        vdp = new VecicleDecisionPlatform(Vehicle, 3, MaxSpeed, MaxRayDistance);
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Process decisions
+        QueueCommandOperation();
         // Call op to realize movement
         Operation();
+
         // Speed value Monitor
         Speed = GetCurrentSpeed();
         nowBreak = GetCurrentDeceleration();
@@ -34,7 +39,18 @@ public class LightCar : VehicleController
 
     void FixedUpdate()
     {
-        ProcessDecision();
+        if (isStart_)
+        {
+            ProcessDecision();
+        }
+    }
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.layer == 6)
+        {
+            // ToDo
+            SceneManager.LoadScene(1);
+        }
     }
 
     /*********************Class methods***********************/
@@ -51,10 +67,17 @@ public class LightCar : VehicleController
     /// </summary>
     protected override void ProcessDecision()
     {
-        // Get straight movement decision from agent
-        vdp.GenerateStraightMovement();
         vdp.GenerateTurningMovement();
-        // Process decisions
-        QueueCommandOperation();
+        if (!vdp.motherBoard.GetIsForwardBlocked())
+        {
+            // Get straight movement decision from agent
+            vdp.GenerateStraightMovement();
+        }
+    }
+
+    public void SetScale(float _scale)
+    {
+        SelfScale = _scale;
+        SetDefaultParam(SelfScale);
     }
 }

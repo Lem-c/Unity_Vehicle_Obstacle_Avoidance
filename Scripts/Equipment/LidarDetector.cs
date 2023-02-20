@@ -5,6 +5,8 @@ namespace VehicleEqipment.Lidar
 {
     public class LidarDetector : Detector
     {
+        protected bool isTurning = false;      // Whether next step is turning
+
         public LidarDetector(int _layer, float _rayDistance, float _sideVisualAngle = 0)
         {
             SetParameters(_layer, _rayDistance, _sideVisualAngle);
@@ -24,10 +26,9 @@ namespace VehicleEqipment.Lidar
                 MaxRayDistance, LayerMask))
             {
                 // DrawRay(_target.position, _target.TransformDirection(Vector3.forward), Color.red);
-
                 return true;
             }
-
+            isTurning= false;
             return false;
         }
 
@@ -77,7 +78,7 @@ namespace VehicleEqipment.Lidar
 
                 activateTimes += 1;
             }
-
+            isTurning = isDetected;
             return isDetected;
         }
 
@@ -120,6 +121,11 @@ namespace VehicleEqipment.Lidar
         public float GetYBiasAngle()
         {
             return angleBias_y;
+        }
+
+        public bool GetIsTurning()
+        {
+            return isTurning;
         }
     }
 }
