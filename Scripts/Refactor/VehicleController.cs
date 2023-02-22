@@ -19,7 +19,7 @@ public abstract class VehicleController : MonoBehaviour
     private float turnAngle;
     private MovementStep.MoveMent currentMove;  // Current operation
 
-    // In-game object reference
+    // In-game object reference [Essential part]
     protected GameObject Vehicle;       // Get Vehicle Object
     protected VecicleDecisionPlatform vdp;         // Logic process model
 
@@ -103,7 +103,7 @@ public abstract class VehicleController : MonoBehaviour
         if (vdp.stepManager.GetLengthOfRecord() > 0)
         {
             currentMove = vdp.stepManager.PopNextMove();
-            Debug.Log(currentMove);
+            // Debug.Log(currentMove);
             ActionApply();
         }
     }

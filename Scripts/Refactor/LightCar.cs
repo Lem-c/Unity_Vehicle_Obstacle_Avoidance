@@ -1,5 +1,4 @@
 using UnityEngine;
-using ActionManager;
 using UnityEngine.SceneManagement;
 
 public class LightCar : VehicleController
@@ -43,7 +42,16 @@ public class LightCar : VehicleController
         {
             ProcessDecision();
         }
+
+        Debug.Log( vdp.motherBoard.KalmanEstimation());
+        // vdp.motherBoard.KalmanFilter.WriteLine();
     }
+
+    /// <summary>
+    /// If vehicle hit to the edge of the map,
+    /// Restart the scene
+    /// </summary>
+    /// <param name="other"></param>
     private void OnTriggerStay(Collider other)
     {
         if (other.gameObject.layer == 6)

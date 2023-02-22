@@ -1,6 +1,5 @@
-using ActionManager;
+using MathNet.Numerics.LinearAlgebra.Single;
 using System;
-using System.Collections;
 using UnityEngine;
 using VehicleEqipment;
 using VehicleEqipment.Lidar;
@@ -18,6 +17,9 @@ public class VehicleHardWare
     LidarDetector LeftLidar;
     LidarDetector RightLidar;
 
+    // Default Data processer
+    public KalmanFilter KalmanFilter;
+
 
     public VehicleHardWare(GameObject _target, float _rayDistance, int _detectiveLayer)
     {
@@ -33,6 +35,13 @@ public class VehicleHardWare
         StrightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance);
         LeftLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
         RightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
+
+        KalmanFilter = new KalmanFilter();
+    }
+
+    public DenseMatrix KalmanEstimation()
+    {
+        return KalmanFilter.ProcessKalmanFilter(UpdateVehiclePosition());
     }
 
     public bool StraightLidarDetctation()
@@ -97,6 +106,14 @@ public class VehicleHardWare
     {
         LeftLidar.RecoverAngle();
         RightLidar.RecoverAngle();
+    }
+
+    private DenseMatrix UpdateVehiclePosition()
+    {
+        float[,] tempPos = new float[,] { { Target.GetComponent<Transform>().position.x,
+                                            Target.GetComponent<Transform>().position.z} };
+
+        return DenseMatrix.OfArray(tempPos);
     }
 
     /*public bool WhetherNeedTurning()
