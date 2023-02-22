@@ -55,7 +55,7 @@ namespace ActionManager
         // Add a new action to the record list
         protected void AddNewRecord(MoveMent _step)
         {
-            if (GetLengthOfRecord() > 3)
+            if (GetLengthOfRecord() > 2 && nextMove==MoveMent.MoveForward)
             {
                 RefreshRecord();
                 return;

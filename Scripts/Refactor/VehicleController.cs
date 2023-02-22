@@ -1,5 +1,6 @@
 using UnityEngine;
 using ActionManager;
+using Unity.VisualScripting;
 
 public abstract class VehicleController : MonoBehaviour
 {
@@ -177,7 +178,7 @@ public abstract class VehicleController : MonoBehaviour
     }
     public void ChangeStartPosition(float _x = 0.5f, float _z = -5.2f)
     {
-        if (Vehicle is null)
+        if (Vehicle.IsUnityNull())
         {
             throw new System.Exception("Empty Vehilce!");
         }

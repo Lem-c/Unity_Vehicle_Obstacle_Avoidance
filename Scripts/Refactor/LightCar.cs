@@ -31,6 +31,8 @@ public class LightCar : VehicleController
         // Call op to realize movement
         Operation();
 
+        vdp.motherBoard.CheckIsCloseToDestination(GameObject.FindWithTag("SceneView").GetComponent<Camera>());
+
         // Speed value Monitor
         Speed = GetCurrentSpeed();
         nowBreak = GetCurrentDeceleration();
@@ -43,7 +45,7 @@ public class LightCar : VehicleController
             ProcessDecision();
         }
 
-        Debug.Log( vdp.motherBoard.KalmanEstimation());
+        // Debug.Log( vdp.motherBoard.KalmanEstimation());
         // vdp.motherBoard.KalmanFilter.WriteLine();
     }
 
@@ -76,11 +78,14 @@ public class LightCar : VehicleController
     protected override void ProcessDecision()
     {
         vdp.GenerateTurningMovement();
-        if (!vdp.motherBoard.GetIsForwardBlocked())
+        vdp.GenerateStraightMovement();
+        // Debug.Log(vdp.stepManager.GetLengthOfRecord());
+
+        /*if (!vdp.motherBoard.GetIsForwardBlocked() && !vdp.motherBoard.WhetherNeedTurning())
         {
             // Get straight movement decision from agent
             vdp.GenerateStraightMovement();
-        }
+        }*/
     }
 
     public void SetScale(float _scale)

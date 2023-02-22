@@ -41,8 +41,9 @@ namespace ActionManager
 
         public override void TurningDecisionMaker(float _speed, float _leftDis, float _rightDis, bool _isForwardblocked)
         {
-            Situation leftState = fdm.GetFuzzyResult(_speed, _leftDis, 2.1f+MaxDecisionBias* UnityEngine.Random.Range(-1,2));
-            Situation rightState = fdm.GetFuzzyResult(_speed, _rightDis, 2.1f+MaxDecisionBias * UnityEngine.Random.Range(-1, 2));
+            /*Fuzzy active threshold is matter, Consider this when meeting problems*/
+            Situation leftState = fdm.GetFuzzyResult(_speed, _leftDis, 2.4f + MaxDecisionBias * UnityEngine.Random.Range(-1, 2));
+            Situation rightState = fdm.GetFuzzyResult(_speed, _rightDis, 2.4f + MaxDecisionBias * UnityEngine.Random.Range(-1, 2));
 
             // Save two side situation into array | No safe check
             Situation[] stateList = { rightState, leftState };
@@ -104,12 +105,7 @@ namespace ActionManager
                     return;
                 }
 
-                if (GetLengthOfRecord() < 3)
-                {
-                    AddNewRecord(MoveMent.MoveForward);
-                    return;
-                }
-
+                AddNewRecord(MoveMent.MoveForward);
                 return;
             }
 
@@ -121,7 +117,7 @@ namespace ActionManager
 
                 // Right lidar found obstacle
                 AddNewRecord(MoveMent.TurnLeft);
-                AddNewRecord(MoveMent.TurnLeft);
+                // AddNewRecord(MoveMent.TurnLeft);
 
                 return;
             }
@@ -133,7 +129,7 @@ namespace ActionManager
 
                 // Left lidar found obstacle
                 AddNewRecord(MoveMent.TurnRight);
-                AddNewRecord(MoveMent.TurnRight);
+                // AddNewRecord(MoveMent.TurnRight);
 
                 return;
             }

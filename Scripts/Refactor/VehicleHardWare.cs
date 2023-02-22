@@ -2,6 +2,7 @@ using MathNet.Numerics.LinearAlgebra.Single;
 using System;
 using UnityEngine;
 using VehicleEqipment;
+using VehicleEqipment.Camera;
 using VehicleEqipment.Lidar;
 
 public class VehicleHardWare
@@ -16,6 +17,7 @@ public class VehicleHardWare
     LidarDetector StrightLidar;
     LidarDetector LeftLidar;
     LidarDetector RightLidar;
+    CameraDetector UpperCamera;
 
     // Default Data processer
     public KalmanFilter KalmanFilter;
@@ -35,6 +37,7 @@ public class VehicleHardWare
         StrightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance);
         LeftLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
         RightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
+        UpperCamera = new CameraDetector();
 
         KalmanFilter = new KalmanFilter();
     }
@@ -67,6 +70,34 @@ public class VehicleHardWare
         return isBlocked;
     }
 
+    /// <summary>
+    /// Using a target camera to get the position of mouse in the SceneWorld
+    /// Can only be used when mouse click and a target camera
+    /// </summary>
+    /// <param name="_cam">The target camera</param>
+    public void CheckIsCloseToDestination(Camera _cam)
+    {
+        if (!Input.GetMouseButtonUp(0)){ return; }
+
+        Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        bool isCollider = Physics.Raycast(ray, out hit);
+        if (isCollider)
+        {
+            Debug.Log(UpperCamera.IsAngleShrink(hit.point, Target.GetComponent<Transform>().position));
+        }
+        
+    }
+
+    /// <summary>
+    /// Get lidar distance measurement result according to the type
+    /// </summary>
+    /// <param name="_type">
+    /// 1:Straight Lidar
+    /// 2:Left
+    /// 3:Right
+    /// </param>
+    /// <returns></returns>
     public float DistanceToObstacle(int _type=1)
     {
         if(_type == 1)
@@ -116,18 +147,13 @@ public class VehicleHardWare
         return DenseMatrix.OfArray(tempPos);
     }
 
-    /*public bool WhetherNeedTurning()
+    public bool WhetherNeedTurning()
     {
-        if(!GetIsForwardBlocked())
-        {
-            return false;
-        }
-
-        if(LeftLidar.DistanceTo()<0 || RightLidar.DistanceTo() < 0)
+        if (LeftLidar.DistanceTo() > 0 || RightLidar.DistanceTo() > 0)
         {
             return true;
         }
 
         return false;
-    }*/
+    }
 }
