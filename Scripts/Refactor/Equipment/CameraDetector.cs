@@ -5,6 +5,7 @@ namespace VehicleEqipment.Camera
     public class CameraDetector : Detector
     {
         float angleOff;
+        float newDistance=1000f;
         // TODO: Keep record original start point
 
 
@@ -32,6 +33,26 @@ namespace VehicleEqipment.Camera
             CalculateAngle(_vehicle, _destination);
 
             if(angleOff < tempAngle)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// Check whether two points are closing to each other
+        /// </summary>
+        /// <param name="_vehicle">vehilce vecotr.Forward</param>
+        /// <param name="_destination">detination vector</param>
+        /// <returns></returns>
+        public bool IsClosingTo(Vector3 _vehicle, Vector3 _destination)
+        {
+            var tempDistance = newDistance;
+            newDistance = Vector3.Distance(_vehicle, _destination);
+
+            if(newDistance <= tempDistance)
             {
                 return true;
             }

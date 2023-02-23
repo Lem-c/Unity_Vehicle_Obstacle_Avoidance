@@ -101,7 +101,7 @@ namespace ActionManager
             {
                 if (_isForawadBlocked && canTurning)
                 {
-                    RandomTurning();
+                    RandomTurning(-10);
                     return;
                 }
 

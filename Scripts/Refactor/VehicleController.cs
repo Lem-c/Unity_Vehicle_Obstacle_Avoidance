@@ -176,6 +176,12 @@ public abstract class VehicleController : MonoBehaviour
     {
         isStart_ = !isStart_;
     }
+
+    public bool GetCurrentState()
+    {
+        return isStart_;
+    }
+
     public void ChangeStartPosition(float _x = 0.5f, float _z = -5.2f)
     {
         if (Vehicle.IsUnityNull())

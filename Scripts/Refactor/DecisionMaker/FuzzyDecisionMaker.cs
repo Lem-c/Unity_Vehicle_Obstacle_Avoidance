@@ -50,7 +50,7 @@ namespace DecisionMake
 
             // Get degree fucntion and apply fuzzyfication
             Fuzzyfication(_currentSpeed, _currentDis);
-            Debug.Log(GetWeightedAverage());
+            // Debug.Log(GetWeightedAverage());
             // Calculate average weight sum and get Situation
             var state = ActivateFunction( GetWeightedAverage(), _threshlod);
 
