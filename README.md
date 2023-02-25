@@ -1,4 +1,4 @@
-# Untiy_Vehicle_Obstacle_Avoidance
+# Unity_Vehicle_Obstacle_Avoidance
 
 Download usable windows unity build .exe file:
 
