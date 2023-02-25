@@ -12,8 +12,11 @@ public class BarController : MonoBehaviour
     private Button PauseButton;
     private Button ChangePos;
     private Slider SpeedScale;
+    private Toggle IsCameraOn;
 
     private GameObject Vehicle;
+    private GameObject VehicleCamera; 
+    private int choice = 0;
 
     public void OnEnable()
     {
@@ -23,10 +26,13 @@ public class BarController : MonoBehaviour
         FindButtons();
 
         Vehicle = GameObject.FindWithTag("Player");
+        VehicleCamera = GameObject.FindGameObjectWithTag("MainCamera");
 
-        SimButton.RegisterCallback<ClickEvent>(ev => OnSimClicked());
-        PauseButton.RegisterCallback<ClickEvent>(ev => OnPauseClicked());
-        ChangePos.RegisterCallback<ClickEvent>(ev => ChangeStartPosition());
+        SimButton.RegisterCallback<ClickEvent>(ev_sim => OnSimClicked());
+        PauseButton.RegisterCallback<ClickEvent>(ev_pause => OnPauseClicked());
+        ChangePos.RegisterCallback<ClickEvent>(ev_pos => ChangeStartPosition());
+        IsCameraOn.RegisterValueChangedCallback(ev_cam => OnToggleClicked());
+        
     }
 
     public void FixedUpdate()
@@ -41,31 +47,47 @@ public class BarController : MonoBehaviour
 
     private void OnSimClicked()
     {
-        Vehicle.GetComponent<TestVehicle>().StartSim();
+        Vehicle.GetComponent<LightCar>().ChangeStartState();
+    }
+
+    private void OnToggleClicked()
+    {
+        VehicleCamera.SetActive(IsCameraOn.value);
     }
 
     private void UpdateSpeed()
     {
-        Vehicle.GetComponent<TestVehicle>().SetScale(SpeedScale.value * 0.1f);
+        Vehicle.GetComponent<LightCar>().SetScale(SpeedScale.value * 0.1f);
     }
 
     private void ChangeStartPosition()
     {
-        int choice = UnityEngine.Random.Range(0, 3);
+        if (choice >= 3)
+        {
+            choice = 0;
+        }
+        else
+        {
+            choice += 1;
+        }
 
-        switch(choice)
+        switch (choice)
         {
             case 0:
-                Vehicle.GetComponent<TestVehicle>().StartPosition(-4.62f); break;
+                Vehicle.GetComponent<LightCar>().ChangeStartPosition(-4.54f, -7.2f ); break;
             case 1:
-                Vehicle.GetComponent<TestVehicle>().StartPosition(4.82f, -3.5f); break;
-            case 2: 
-                Vehicle.GetComponent<TestVehicle>().StartPosition(); break;
+                Vehicle.GetComponent<LightCar>().ChangeStartPosition(0.36f, -7.2f); break;
+            case 2:
+                Vehicle.GetComponent<LightCar>().ChangeStartPosition(5.33f, -7.2f); break;
             default:
-                Vehicle.GetComponent<TestVehicle>().StartPosition(-2.9f); break;   
+                Vehicle.GetComponent<LightCar>().ChangeStartPosition(-7.76f, -7.2f); break;
         }
     }
 
+    /// <summary>
+    /// Find all elements in the top bar
+    /// </summary>
+    /// <exception cref="System.Exception"></exception>
     private void FindButtons()
     {
         if (root is null)
@@ -79,6 +101,9 @@ public class BarController : MonoBehaviour
 
         SpeedScale = root.Q<Slider>("SpeedScale");
         SpeedScale.value = 1f;
+
+        IsCameraOn = root.Q<Toggle>("IsCameraOn");
+        IsCameraOn.value = true;
     }
 
 }
