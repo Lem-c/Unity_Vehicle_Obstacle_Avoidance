@@ -2,7 +2,7 @@
 
 Download usable windows unity build .exe file:
 
--Current latest version-[0.16](https://github.com/Lem-c/Unity_Vehicle_Obstacle_Avoidance/releases/tag/v0.16) [0.161](https://github.com/Lem-c/Unity_Vehicle_Obstacle_Avoidance/releases/tag/v0.161)
+-Current latest version-[0.16](https://github.com/Lem-c/Unity_Vehicle_Obstacle_Avoidance/releases/tag/v0.16) | [0.161](https://github.com/Lem-c/Unity_Vehicle_Obstacle_Avoidance/releases/tag/v0.161)
 
 -Stable version-[0.15](https://github.com/Lem-c/Unity_Vehicle_Obstacle_Avoidance/releases/tag/v0.15)
 
