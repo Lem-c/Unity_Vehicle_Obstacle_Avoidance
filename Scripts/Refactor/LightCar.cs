@@ -1,14 +1,19 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static LightCar;
 
 public class LightCar : VehicleController
 {
     // Serialized variables shows in the inspector
-    public float Speed;
-    public float nowBreak;
+    public class Dashboard
+    {
+        public double Speed;
+        public double nowBreak;
+    }
 
     // Key device params
     private readonly float MaxRayDistance = 13f;
+    public Dashboard dashboard;
 
 
     /******************Unity methods************************/
@@ -16,7 +21,9 @@ public class LightCar : VehicleController
     void Start()
     {
         Vehicle = GameObject.FindWithTag("Player");
-        
+        dashboard = new Dashboard();
+
+
         SetDefaultParam(SelfScale);
         // TODO: When updating 'LightCar' using method: SetDefaultParam,
         // MaxSpeed.. in vdp class would not update correspondingly
@@ -31,11 +38,11 @@ public class LightCar : VehicleController
         // Call op to realize movement
         Operation();
 
-        vdp.motherBoard.CheckIsCloseToDestination(GameObject.FindWithTag("SceneView").GetComponent<Camera>());
+        // vdp.motherBoard.CheckIsCloseToDestination(GameObject.FindWithTag("SceneView").GetComponent<Camera>());
 
         // Speed value Monitor
-        Speed = GetCurrentSpeed();
-        nowBreak = GetCurrentDeceleration();
+        dashboard.Speed = GetCurrentSpeed();
+        dashboard.nowBreak = GetCurrentDeceleration();
     }
 
     void FixedUpdate()

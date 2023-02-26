@@ -1,33 +1,40 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
-using System;
 
 public class BarController : MonoBehaviour
 {
     private UIDocument document;
 
     private VisualElement root;
-    private Button SimButton;
     private Button PauseButton;
-    private Button ChangePos;
-    private Slider SpeedScale;
+    private Button ResetButton;
+    private Toggle IsCameraOn;
+    private Foldout File;
+    private Foldout Position;
 
     private GameObject Vehicle;
+    private GameObject VehicleCamera; 
     private int choice = 0;
+
+    // Serialize
+    private JsonAssist json;
 
     public void OnEnable()
     {
         document = this.GetComponent<UIDocument>();
         root = document.rootVisualElement;
+        // init json class
+        json = new JsonAssist("built/");
 
-        FindButtons();
+        DefaultSetUp();
 
         Vehicle = GameObject.FindWithTag("Player");
+        VehicleCamera = GameObject.FindGameObjectWithTag("MainCamera");
 
-        SimButton.RegisterCallback<ClickEvent>(ev => OnSimClicked());
-        PauseButton.RegisterCallback<ClickEvent>(ev => OnPauseClicked());
-        ChangePos.RegisterCallback<ClickEvent>(ev => ChangeStartPosition());
+        PauseButton.RegisterCallback<ClickEvent>(ev_sim => OnPauseClicked());
+        ResetButton.RegisterCallback<ClickEvent>(ev_pause => OnResetClicked());
+        IsCameraOn.RegisterValueChangedCallback(ev_cam => OnToggleClicked());
     }
 
     public void FixedUpdate()
@@ -35,19 +42,24 @@ public class BarController : MonoBehaviour
         UpdateSpeed();
     }
 
-    private void OnPauseClicked()
+    private void OnResetClicked()
     {
         SceneManager.LoadScene(1);
     }
 
-    private void OnSimClicked()
+    private void OnPauseClicked()
     {
         Vehicle.GetComponent<LightCar>().ChangeStartState();
     }
 
+    private void OnToggleClicked()
+    {
+        VehicleCamera.SetActive(IsCameraOn.value);
+    }
+
     private void UpdateSpeed()
     {
-        Vehicle.GetComponent<LightCar>().SetScale(SpeedScale.value * 0.1f);
+        Vehicle.GetComponent<LightCar>().SetScale(0.1f);
     }
 
     private void ChangeStartPosition()
@@ -74,19 +86,50 @@ public class BarController : MonoBehaviour
         }
     }
 
-    private void FindButtons()
+    private void OnSaveClicked()
+    {
+        json.SaveFile(Vehicle.GetComponent<LightCar>());
+    }
+
+    private void OnLoadClicked()
+    {
+        json.LoadFile();
+    }
+
+    /// <summary>
+    /// Find all elements in the top bar
+    /// </summary>
+    /// <exception cref="System.Exception"></exception>
+    private void DefaultSetUp()
     {
         if (root is null)
         {
             throw new System.Exception("Null document reference");
         }
-
-        SimButton = root.Q<Button>("Simulate");
+        // bind buttons
         PauseButton = root.Q<Button>("Pause");
-        ChangePos = root.Q<Button>("ChangePos");
-
-        SpeedScale = root.Q<Slider>("SpeedScale");
-        SpeedScale.value = 1f;
+        ResetButton = root.Q<Button>("Restart");
+        // bind toggle
+        IsCameraOn = root.Q<Toggle>("IsCameraOn");
+        IsCameraOn.value = true;
+        // bind fold out
+        File = root.Q<Foldout>("FileControl");
+        Position = root.Q<Foldout>("PosControl");
+        SetFoldOut();
     }
 
+    private void SetFoldOut()
+    {
+        Label save = new Label("Save");
+        Label load = new Label("Load");
+        Label randomPos = new Label("Next");
+
+        File.Add(save);
+        File.Add(load);
+        Position.Add(randomPos);
+
+        save.RegisterCallback<ClickEvent>(ev_save => OnSaveClicked());
+        load.RegisterCallback<ClickEvent>(ev_pos => OnLoadClicked());
+        randomPos.RegisterCallback<ClickEvent>(ev_pos => ChangeStartPosition());
+    }
 }

@@ -1,7 +1,6 @@
 using MathNet.Numerics.LinearAlgebra.Single;
 using System;
 using UnityEngine;
-using VehicleEqipment;
 using VehicleEqipment.Camera;
 using VehicleEqipment.Lidar;
 
@@ -84,7 +83,7 @@ public class VehicleHardWare
         bool isCollider = Physics.Raycast(ray, out hit);
         if (isCollider)
         {
-            Debug.Log(UpperCamera.IsAngleShrink(hit.point, Target.GetComponent<Transform>().position));
+            // Debug.Log(UpperCamera.IsAngleShrink(hit.point, Target.GetComponent<Transform>().position));
         }
         
     }

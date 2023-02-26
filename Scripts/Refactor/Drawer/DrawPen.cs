@@ -3,23 +3,25 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.GlobalIllumination;
 
 public class DrawPen : MonoBehaviour
 {
-    private GameObject pen;
     private LineRenderer line;
-    private Bezier bezier;
-    private Material penMat;
+    private Bezier bezier;                  // Curve darawing class
+    private Material penMat;                // Material of pen
 
     // data array
-    private ArrayList pointList;
-    private List<Vector3> lineList;
+    private ArrayList pointList;            // List saving coordinates of Vehicle
+    private List<Vector3> lineList;         // List saving points of line
 
     // Tracing target
-    private GameObject Vehicle;
+    protected GameObject Vehicle;
+    protected GameObject pen;
 
-    public void DefaultSetup()
+    /// <summary>
+    /// The default construction of parameters
+    /// </summary>
+    protected void DefaultSetup()
     {
         pen = GameObject.FindWithTag("Drawer");
         Vehicle = GameObject.FindWithTag("Player");
@@ -33,30 +35,12 @@ public class DrawPen : MonoBehaviour
         bezier = new Bezier();
     }
 
-    void Awake()
+    /// <summary>
+    /// Drawing line according to the number of points in array
+    /// </summary>
+    protected void DrawLine()
     {
-        DefaultSetup();
-
-        if (pen == null || Vehicle == null)
-        {
-            throw new Exception("Null pen/target object!");
-        }
-    }
-
-    void Update()
-    {
-        if (Vehicle.GetComponent<LightCar>().GetCurrentState())
-        {
-            AddNewPoint(Vehicle.GetComponent<Transform>().position);
-
-            // Update points of lineRanderer
-            DrawLine();
-        }
-    }
-
-    private void DrawLine()
-    {
-        if(pointList.Count < 3)
+        if(pointList.Count < 4)
         {
             return;
         }
@@ -64,12 +48,6 @@ public class DrawPen : MonoBehaviour
         line.positionCount = lineList.Count;
         lineList.Add(bezier.formula(pointList, 0.1f));
         line.SetPositions(lineList.ToArray());
-
-        /*for (int i = 0; i < pointList.Count; ++i)
-        {
-            Vector3 to = bezier.formula(pointList, 0.5f);
-            line.SetPosition(i, to);
-        }*/
     }
 
 
@@ -89,10 +67,10 @@ public class DrawPen : MonoBehaviour
             return;
         }
 
-        line.startColor = new Color(1f, 1f, 0f, 0.5f);
-        line.endColor = new Color(0f, 1f, 1f, 0.5f);
-        line.startWidth = 0.1f;
-        line.endWidth = 0.1f;
+        line.startColor = new Color(2f, 1f, 0f, 0.5f);
+        line.endColor = new Color(3f, 1f, 1f, 0.5f);
+        line.startWidth = 0.2f;
+        line.endWidth = 0.2f;
         line.numCapVertices = 2;      // End point slick
         line.numCornerVertices = 2;
     }

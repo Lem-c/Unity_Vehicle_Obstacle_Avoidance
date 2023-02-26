@@ -1,6 +1,5 @@
 using DecisionMake;
 using System;
-using UnityEngine;
 using static DecisionMake.DecisionMaker;
 
 namespace ActionManager
@@ -12,10 +11,14 @@ namespace ActionManager
     /// </summary>
     public class SmoothMovement : MovementStep
     {
-        // The fuzzy logic model
+        /// <summary>
+        /// The fuzzy logic model
+        /// </summary>
         private FuzzyDecisionMaker fdm;
 
-        // Decision Space
+        /// <summary>
+        /// Decision Space
+        /// </summary>
         private readonly float MaxDecisionBias = 0.05f;
 
         public SmoothMovement(float _maxSpeed, float _MaxRayDistance)
@@ -117,7 +120,7 @@ namespace ActionManager
 
                 // Right lidar found obstacle
                 AddNewRecord(MoveMent.TurnLeft);
-                // AddNewRecord(MoveMent.TurnLeft);
+                AddNewRecord(MoveMent.TurnLeft);
 
                 return;
             }
@@ -129,7 +132,7 @@ namespace ActionManager
 
                 // Left lidar found obstacle
                 AddNewRecord(MoveMent.TurnRight);
-                // AddNewRecord(MoveMent.TurnRight);
+                AddNewRecord(MoveMent.TurnRight);
 
                 return;
             }
