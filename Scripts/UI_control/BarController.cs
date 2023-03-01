@@ -45,7 +45,7 @@ public class BarController : MonoBehaviour
 
     private void OnResetClicked()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void OnPauseClicked()
