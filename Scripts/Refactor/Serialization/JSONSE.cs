@@ -49,7 +49,13 @@ public abstract class JSONSE
             throw new System.Exception("Wrong save dir");
         }
 
-        if(obj_str == null || obj_str.Length == 0)
+        // Check whether has taget folder, if not creat one
+        if (!File.Exists(_url))
+        {
+            Directory.CreateDirectory(_url);
+        }
+
+        if (obj_str == null || obj_str.Length == 0)
         {
             Debug.LogWarning("Json hasn't load before saving");
         }
@@ -67,13 +73,14 @@ public abstract class JSONSE
     {
         if (_url == null || _url.Length == 0)
         {
-            throw new System.Exception("Wrong save dir");
+            throw new System.Exception("Wrong load dir");
         }
 
         string dataPath = _url;
+        // Debug.Log(dataPath);
         if (!File.Exists(dataPath))
         {
-            throw new System.Exception("File path contains nothing");
+            throw new ArgumentException("Target file doesn't exist!");
         }
 
         StreamReader sr = new StreamReader(dataPath);

@@ -36,6 +36,6 @@ public class JsonAssist : JSONSE
         }
 
         savePath = _url;
-        Debug.LogWarning("Warning:Save path changed");
+        // Debug.LogWarning("Warning:Save path changed");
     }
 }

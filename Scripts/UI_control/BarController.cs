@@ -12,6 +12,7 @@ public class BarController : MonoBehaviour
     private Toggle IsCameraOn;
     private Foldout File;
     private Foldout Position;
+    private Foldout Map;
 
     private GameObject Vehicle;
     private GameObject VehicleCamera; 
@@ -25,7 +26,7 @@ public class BarController : MonoBehaviour
         document = this.GetComponent<UIDocument>();
         root = document.rootVisualElement;
         // init json class
-        json = new JsonAssist("built/");
+        json = new JsonAssist(Application.dataPath+"/PlayerData/");
 
         DefaultSetUp();
 
@@ -96,6 +97,15 @@ public class BarController : MonoBehaviour
         json.LoadFile();
     }
 
+    private void OnMap01Clicked()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    private void OnMap02Clicked()
+    {
+        SceneManager.LoadScene(2);
+    }
     /// <summary>
     /// Find all elements in the top bar
     /// </summary>
@@ -115,6 +125,7 @@ public class BarController : MonoBehaviour
         // bind fold out
         File = root.Q<Foldout>("FileControl");
         Position = root.Q<Foldout>("PosControl");
+        Map = root.Q<Foldout>("MapControl");
         SetFoldOut();
     }
 
@@ -123,13 +134,19 @@ public class BarController : MonoBehaviour
         Label save = new Label("Save");
         Label load = new Label("Load");
         Label randomPos = new Label("Next");
+        Label scene_1 = new Label("Map01");
+        Label scene_2 = new Label("Map02");
 
         File.Add(save);
         File.Add(load);
         Position.Add(randomPos);
+        Map.Add(scene_1);
+        Map.Add(scene_2);
 
         save.RegisterCallback<ClickEvent>(ev_save => OnSaveClicked());
         load.RegisterCallback<ClickEvent>(ev_pos => OnLoadClicked());
         randomPos.RegisterCallback<ClickEvent>(ev_pos => ChangeStartPosition());
+        scene_1.RegisterCallback<ClickEvent>(ev_load01 => OnMap01Clicked());
+        scene_2.RegisterCallback<ClickEvent>(ev_load02 => OnMap02Clicked());
     }
 }
