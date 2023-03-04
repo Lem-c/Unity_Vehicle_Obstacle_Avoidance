@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="TopBar" style="background-image: url(&apos;project://database/Assets/Mat/Image/Bar_bg.png?fileID=2800000&amp;guid=5a41a5b235e982d43922c38280a571f4&amp;type=3#Bar_bg&apos;); -unity-background-scale-mode: scale-and-crop; flex-direction: row; -unity-slice-left: 0; -unity-slice-top: 0; -unity-slice-right: 0; -unity-slice-bottom: 0;">
+        <ui:Slider picking-mode="Ignore" label="Speed Scale" value="42" high-value="100" name="SpeedScale" style="width: 488px; color: rgb(207, 183, 130); -unity-text-align: middle-center; -unity-font-style: bold; font-size: 25px;" />
+        <ui:Toggle text="Turn on/off camera" name="IsCameraOn" value="false" tooltip="Control the camera inistalled on the vehicle" style="left: 5px; color: rgb(190, 169, 123); -unity-font-style: bold; font-size: 24px; -unity-text-align: middle-center;" />
+        <ui:GroupBox name="Button_box" style="width: 400px; flex-direction: row; justify-content: space-around; left: 15px;">
+            <ui:Button text="Random Position" display-tooltip-when-elided="true" name="ChangePos" />
+            <ui:Button text="Re-start" display-tooltip-when-elided="true" name="Pause" />
+            <ui:Button text="Start/Pause" display-tooltip-when-elided="true" name="Simulate" style="-unity-font-style: bold-and-italic; color: rgb(140, 51, 51); left: 60px;" />
+        </ui:GroupBox>
+    </ui:VisualElement>
+    <ui:VisualElement style="position: relative; height: 450px; width: 505px; border-left-color: rgb(200, 231, 80); border-right-color: rgb(200, 231, 80); border-top-color: rgb(200, 231, 80); border-bottom-color: rgb(200, 231, 80); border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; top: 445px; left: 770px;" />
+</ui:UXML>

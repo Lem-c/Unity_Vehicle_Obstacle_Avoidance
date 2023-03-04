@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="Discription" style="height: 466px; width: 787px; top: 10%; bottom: auto; position: absolute;">
+        <ui:GroupBox name="PlaceHolder" style="height: 125px;" />
+        <ui:Label text="Current Functions And Future Update Aims" display-tooltip-when-elided="true" name="Title" style="height: 45px; font-size: 30px; -unity-font: url(&apos;project://database/Library/unity%20default%20resources?fileID=10102&amp;guid=0000000000000000e000000000000000&amp;type=0#Arial&apos;); -unity-font-style: bold; color: rgb(224, 156, 90);" />
+        <ui:Toggle label="Fuzzy Decision Making" value="true" name="Fuzzy" style="font-size: 20px; color: rgb(255, 255, 255);" />
+        <ui:Toggle label="Kalman filter-Covariance noise reduction" value="true" name="Covariance" style="font-size: 20px; color: rgb(255, 255, 255);" />
+        <ui:Toggle label="Q-Learning (Reinforcement Learning)" value="false" name="CV" style="font-size: 20px; color: rgb(255, 255, 255);" />
+    </ui:VisualElement>
+    <ui:VisualElement name="StartMenu" style="height: 300px; width: 300px; left: 75%; top: 60%; align-items: stretch; justify-content: center;">
+        <ui:Button text="Start" display-tooltip-when-elided="true" name="Start" style="bottom: auto; height: 75px; font-size: 25px;" />
+        <ui:Button text="Quit" display-tooltip-when-elided="true" name="Quit" style="height: 75px; top: 50px; font-size: 25px; color: rgb(149, 90, 74); -unity-font-style: bold;" />
+    </ui:VisualElement>
+</ui:UXML>
