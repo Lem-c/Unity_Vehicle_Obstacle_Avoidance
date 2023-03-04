@@ -15,6 +15,10 @@ public class MapGen
         GetObjctByRow(GetMapFile(_file));
     }
 
+    /// <summary>
+    /// Method used to generte all map
+    /// Generate ground first and then walls
+    /// </summary>
     public void GenerateMap()
     {
         PlaceGround();
@@ -40,11 +44,13 @@ public class MapGen
 
         for (int i = 0; i < mapRow.Length; i++)                           // Read each line
         {
-            List<string> map_row = new List<string>(mapRow[i].Split(','));// splt by ','
+            List<string> map_row = new List<string>(mapRow[i].Split(','));// split by ','
+
             if (width < map_row.Count)
-            {                                                             // Get length of plane
+            {                                                             // Update length of plane
                 width = map_row.Count;
             }
+
             map.Add(map_row);                                             // Add data into list
         }
     }
@@ -55,6 +61,8 @@ public class MapGen
         {
             throw new ArgumentNullException("Empty map file!");
         }
+
+        // TODO:No direction fit!
 
         GameObject map_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
         map_plane.transform.position = new Vector3(0, 0, 0);
@@ -69,17 +77,33 @@ public class MapGen
 
     protected void PlaceObstacles()
     {
+        // TODO:No square/size check!
         
         for (int i = 0; i < map.Count; i++)
         {
             // The height of map is: map.Count
             for (int j = 0; j < map[i].Count; j++)
             {
-                int cube_num = int.Parse(map[i][j]);               
+                int cube_num = int.Parse(map[i][j]);
                 for (int k = 0; k < cube_num; k++)
                 {
                     // Generate Cube
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    // Change material and layer of cube
+                    if (cube_num != 2)
+                    {
+                        Material mat = Resources.Load<Material>("Mat/Floar");
+                        cube.GetComponent<Renderer>().material = mat;
+                        // Change cube layer => Obstacles
+                        cube.layer = LayerMask.NameToLayer("Obstacles");
+                    }
+                    else
+                    {
+                        Material mat = Resources.Load<Material>("Mat/Wall");
+                        cube.GetComponent<Renderer>().material = mat;
+                        // Change cube layer => Obstacles
+                        /*cube.layer = LayerMask.NameToLayer("MapBoundary");*/
+                    }
                     // Coordinate of cube: (-(map_row_max_cells / 2) + i, (float)0.5 + k, -(map_Collections.Count / 2) + j)
                     cube.transform.position = new Vector3(-(width / 2) + i, (float)0.5 + k, -(map.Count / 2) + j);
                 }

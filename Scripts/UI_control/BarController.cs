@@ -50,7 +50,17 @@ public class BarController : MonoBehaviour
 
     private void OnPauseClicked()
     {
-        Vehicle.GetComponent<LightCar>().ChangeStartState();
+        if (Vehicle.GetComponent<LightCar>().enabled)
+        {
+            Vehicle.GetComponent<LightCar>().ChangeStartState();
+            return;
+        }
+
+        /* TODO: There is no NULL ref check! */
+        if (Vehicle.GetComponent<NAVCar>().enabled)
+        {
+            Vehicle.GetComponent<NAVCar>().ChangeStartState();
+        }
     }
 
     private void OnToggleClicked()

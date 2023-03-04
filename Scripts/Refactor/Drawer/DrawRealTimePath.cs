@@ -16,7 +16,7 @@ public class DrawRealTimePath : DrawPen
     void Update()
     {
         // Care about the script that binded with Vehicle object 
-        if (Vehicle.GetComponent<LightCar>().GetCurrentState())
+        if (StateCheck())
         {
             AddNewPoint(Vehicle.GetComponent<Transform>().position);
 

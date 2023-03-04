@@ -67,11 +67,26 @@ public class DrawPen : MonoBehaviour
             return;
         }
 
-        line.startColor = new Color(2f, 1f, 0f, 0.5f);
-        line.endColor = new Color(3f, 1f, 1f, 0.5f);
+        line.startColor = Color.blue;
+        line.endColor = Color.blue;
         line.startWidth = 0.2f;
         line.endWidth = 0.2f;
         line.numCapVertices = 2;      // End point slick
         line.numCornerVertices = 2;
+    }
+
+    protected bool StateCheck()
+    {
+        if (Vehicle.GetComponent<LightCar>().enabled)
+        {
+            return Vehicle.GetComponent<LightCar>().GetCurrentState();
+        }
+
+        if (Vehicle.GetComponent<NAVCar>().enabled)
+        {
+            return Vehicle.GetComponent<NAVCar>().GetCurrentState();
+        }
+
+        return false;
     }
 }

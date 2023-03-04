@@ -182,6 +182,14 @@ public abstract class VehicleController : MonoBehaviour
         return isStart_;
     }
 
+    /// <summary>
+    /// Useed in UI-control button method
+    /// Change the start position of vehicle
+    /// Fix y-axis
+    /// </summary>
+    /// <param name="_x">The horizontal coordinate</param>
+    /// <param name="_z">The vertical cooricate</param>
+    /// <exception cref="System.Exception"></exception>
     public void ChangeStartPosition(float _x = 0.5f, float _z = -5.2f)
     {
         if (Vehicle.IsUnityNull())

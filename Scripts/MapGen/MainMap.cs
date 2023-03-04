@@ -6,7 +6,7 @@ public class MainMap : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        mapGenerator = new MapGen("EasyMap");
+        mapGenerator = new MapGen("EasyMap_2");
         mapGenerator.GenerateMap();
     }
 }

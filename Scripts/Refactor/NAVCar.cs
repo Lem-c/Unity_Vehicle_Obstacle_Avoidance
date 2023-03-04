@@ -1,8 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+/// <summary>
+/// Auto navigation called unity method
+/// Warning: Scene map and obstacles are need to be pre-baked with nav-mesh
+/// Warning:!!
+/// Warning:!!
+/// </summary>
 public class NAVCar : VehicleController
 {
     private NavMeshAgent navMeshAgent;
@@ -19,7 +23,7 @@ public class NAVCar : VehicleController
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && isStart_)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             // Debug.Log(Camera.main.ScreenPointToRay(Input.mousePosition));
