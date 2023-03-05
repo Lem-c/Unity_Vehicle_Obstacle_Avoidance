@@ -30,11 +30,9 @@ public class LightCar : VehicleController
         // Call op to realize movement
         Operation();
 
-        // vdp.motherBoard.CheckIsCloseToDestination(GameObject.FindWithTag("SceneView").GetComponent<Camera>());
-
         // Speed value Monitor
         dashboard.Speed = GetCurrentSpeed();
-        dashboard.nowBreak = GetCurrentDeceleration();
+        dashboard.NowBreak = GetCurrentDeceleration();
     }
 
     void FixedUpdate()
@@ -43,9 +41,6 @@ public class LightCar : VehicleController
         {
             ProcessDecision();
         }
-
-        // Debug.Log( vdp.motherBoard.KalmanEstimation());
-        // vdp.motherBoard.KalmanFilter.WriteLine();
     }
 
     /// <summary>

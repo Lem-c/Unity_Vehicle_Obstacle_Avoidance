@@ -34,7 +34,7 @@ public class VecicleDecisionPlatform
         motherBoard.StraightLidarDetctation();
         // Get distance and speed information
         stepManager.StrightMovementDecisionMaker(
-                    (float)Target.GetComponent<LightCar>().dashboard.Speed,
+                    Target.GetComponent<LightCar>().GetCurrentSpeed(),
                     (float)motherBoard.DistanceToObstacle());
     }
 
@@ -47,16 +47,10 @@ public class VecicleDecisionPlatform
         motherBoard.LeftLidarDetectation();
         motherBoard.RightLidarDetectation();
 
-        stepManager.TurningDecisionMaker((float)Target.GetComponent<LightCar>().dashboard.Speed,
+        stepManager.TurningDecisionMaker((float)Target.GetComponent<LightCar>().GetCurrentSpeed(),
                                          motherBoard.DistanceToObstacle(2),
                                          motherBoard.DistanceToObstacle(3),
                                          motherBoard.GetIsForwardBlocked());
     }
 
-
-    /********************Debug methods****************************/
-    public void PrintCurrentSituation()
-    {
-        throw new System.NotImplementedException();
-    }
 }

@@ -4,7 +4,6 @@ namespace VehicleEqipment.Camera
 {
     public class CameraDetector : Detector
     {
-        float angleOff;
         float newDistance=1000f;
         // TODO: Keep record original start point
 
@@ -26,13 +25,9 @@ namespace VehicleEqipment.Camera
         /// <param name="_vehicle">vehilce vecotr.Forward</param>
         /// <param name="_destination">Calculating by minus vehilce point and destination point</param>
         /// <returns></returns>
-        public bool IsAngleShrink(Vector3 _vehicle, Vector3 _destination)
+        public bool IsAngleShrink(Vector3 _vehicle, Vector3 _destination, float _orginalAngle)
         {
-            float tempAngle = angleOff;
-
-            CalculateAngle(_vehicle, _destination);
-
-            if(angleOff < tempAngle)
+            if(_orginalAngle < CalculateAngle(_vehicle, _destination))
             {
                 return true;
             }
@@ -73,9 +68,7 @@ namespace VehicleEqipment.Camera
                   / (Mathf.Sqrt(_from[0] * _from[0]) + (_from[1] * _from[1])
                           * Mathf.Sqrt(_to[0] * _to[0]) + (_to[1] * _to[1])));
 
-            angleOff = radian / Mathf.PI * 180;
-
-            return angleOff;
+            return radian / Mathf.PI * 180;
         }
 
         /// <summary>

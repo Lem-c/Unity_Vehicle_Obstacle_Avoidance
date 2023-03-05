@@ -6,6 +6,7 @@ using VehicleEqipment.Lidar;
 
 public class VehicleHardWare
 {
+
     private GameObject Target;           // The main vehicle
 
     private int DetectiveLayer;          // The target layer where obstacles located
@@ -17,9 +18,6 @@ public class VehicleHardWare
     LidarDetector LeftLidar;
     LidarDetector RightLidar;
     CameraDetector UpperCamera;
-
-    // Default Data processer
-    public KalmanFilter KalmanFilter;
 
 
     public VehicleHardWare(GameObject _target, float _rayDistance, int _detectiveLayer)
@@ -37,13 +35,6 @@ public class VehicleHardWare
         LeftLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
         RightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
         UpperCamera = new CameraDetector();
-
-        KalmanFilter = new KalmanFilter();
-    }
-
-    public DenseMatrix KalmanEstimation()
-    {
-        return KalmanFilter.ProcessKalmanFilter(UpdateVehiclePosition());
     }
 
     public bool StraightLidarDetctation()

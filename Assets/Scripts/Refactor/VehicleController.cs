@@ -46,7 +46,7 @@ public abstract class VehicleController : MonoBehaviour
     public class Dashboard
     {
         public double Speed { get; set; }
-        public double nowBreak { get; set; }
+        public double NowBreak { get; set; }
     }
 
     /***********************Abstact methods*************/
@@ -99,10 +99,8 @@ public abstract class VehicleController : MonoBehaviour
     /***The main operation control the transformer to move***/
     protected void Operation()
     {
-        if (isStart_)
-        {
-            transform.Translate(Vector3.forward * GetCurrentSpeed() * Time.deltaTime);
-        }
+        if (!isStart_) { return; }
+        transform.Translate(GetCurrentSpeed() * Time.deltaTime * Vector3.forward);   
     }
 
     protected void QueueCommandOperation()
@@ -161,12 +159,12 @@ public abstract class VehicleController : MonoBehaviour
         currentSpeed = _new;
     }
 
-    protected float GetCurrentSpeed()
+    public float GetCurrentSpeed()
     {
         return currentSpeed;
     }
 
-    protected float GetCurrentDeceleration()
+    public float GetCurrentDeceleration()
     {
         return Deceleration;
     }
