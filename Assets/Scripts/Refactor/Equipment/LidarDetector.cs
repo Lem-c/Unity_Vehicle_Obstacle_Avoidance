@@ -35,7 +35,7 @@ namespace VehicleEqipment.Lidar
         /// <summary>
         /// The main method that this class has.
         /// Can be used to detect the obstacles that lays on a rang (sector)
-        /// TODO: The complexity requires improve.
+        /// TODO: The complexity requires improve./ Interface add
         /// </summary>
         /// <param name="_side">The bias added(turn left or right)</param>
         /// <param name="_target">The tartget object that equipped with ray detector</param>
@@ -94,16 +94,6 @@ namespace VehicleEqipment.Lidar
             }
 
             SetYBiasAngle(angleBias_y - _minus);
-        }
-
-        /// <summary>
-        /// Debug method drawing the ray in unity scene window
-        /// </summary>
-        /// <param name="_from"></param>
-        /// <param name="_direction"></param>
-        public void DrawRay(Vector3 _from, Vector3 _direction, Color _color)
-        {
-            Debug.DrawRay(_from, _direction, _color);
         }
 
         /***********Value modify methods*************/

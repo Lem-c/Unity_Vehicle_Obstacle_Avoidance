@@ -66,5 +66,15 @@ namespace VehicleEqipment
 
             return hit.distance;
         }
+
+        /// <summary>
+        /// Debug method drawing the ray in unity scene window
+        /// </summary>
+        /// <param name="_from"></param>
+        /// <param name="_direction"></param>
+        public void DrawRay(Vector3 _from, Vector3 _direction, Color _color)
+        {
+            Debug.DrawRay(_from, _direction, _color);
+        }
     }
 }

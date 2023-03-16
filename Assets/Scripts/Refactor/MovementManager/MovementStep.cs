@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using DecisionMake;
 using static DecisionMake.DecisionMaker;
 
@@ -43,7 +44,9 @@ namespace ActionManager
 
         /***********Methods Interface************/
         public abstract void StrightMovementDecisionMaker(float _speed, float _dist);
+        // TODO: optimize this method
         public abstract void TurningDecisionMaker(float _speed, float _leftDis, float _rightDis, bool _isForwardblocked);
+        public abstract void PrintMessage();
 
         /***********Value Get/Set Methods*********/
         // Return current estimated next action

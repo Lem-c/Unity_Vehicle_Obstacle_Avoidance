@@ -1,5 +1,5 @@
 using System;
-
+using System.Collections.Generic;
 
 namespace ActionManager
 {
@@ -84,7 +84,7 @@ namespace ActionManager
         }
 
         /********************Debug methods****************************/
-        public void PrintCurrentSituation()
+        public override void PrintMessage()
         {
             UnityEngine.Debug.Log(GetNextMove());
         }

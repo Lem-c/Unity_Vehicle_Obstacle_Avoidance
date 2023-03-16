@@ -38,12 +38,5 @@ public interface DynamicWindow {
     /// <param name="_obsPenalty">Value from:ObstaclePenalty(...)</param>
     /// <returns>The value of evaluation</returns>
     abstract float DwaObjective(float _speedGain, float _destinationGain, float _obsPenalty);
-
-    /// <summary>
-    /// Is the value reach the fire value
-    /// </summary>
-    /// <param name="_val">The checked value</param>
-    /// <returns>bool</returns>
-    abstract bool ActiveFunction(float _val);
 }
 

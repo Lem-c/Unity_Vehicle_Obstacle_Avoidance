@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra.Single;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using VehicleEqipment.Camera;
 using VehicleEqipment.Lidar;
@@ -17,6 +18,7 @@ public class VehicleHardWare
     LidarDetector StrightLidar;
     LidarDetector LeftLidar;
     LidarDetector RightLidar;
+    
     CameraDetector UpperCamera;
 
 
@@ -34,9 +36,10 @@ public class VehicleHardWare
         StrightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance);
         LeftLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
         RightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
-        UpperCamera = new CameraDetector();
+        UpperCamera = new CameraDetector(_target, DetectiveLayer, _rayDistance, 25);
     }
 
+    /**************** Lidar detection methods **********************/
     public bool StraightLidarDetctation()
     {
         var isBlocked = StrightLidar.RayDetection(Target.GetComponent<Transform>());
@@ -60,23 +63,30 @@ public class VehicleHardWare
         return isBlocked;
     }
 
-    /// <summary>
-    /// Using a target camera to get the position of mouse in the SceneWorld
-    /// Can only be used when mouse click and a target camera
-    /// </summary>
-    /// <param name="_cam">The target camera</param>
-    public void CheckIsCloseToDestination(Camera _cam)
+    /************* Camera detection result ***********************/
+    public bool[] CameraDetect()
     {
-        if (!Input.GetMouseButtonUp(0)){ return; }
+        var cam = GameObject.FindWithTag("SceneView").GetComponent<Camera>();
+        var isClosing_ = false;
+        UpperCamera.ProcessCamera(cam, 0.5f, 0.6f, ref isClosing_);
 
-        Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        bool isCollider = Physics.Raycast(ray, out hit);
-        if (isCollider)
-        {
-            // Debug.Log(UpperCamera.IsAngleShrink(hit.point, Target.GetComponent<Transform>().position));
-        }
-        
+        bool[] result = {isClosing_, UpperCamera.choice };
+        return result;
+    }
+
+    public List<float> GetCameraData(int index)
+    {
+        return UpperCamera.GetIndexOfDataMap(index);
+    }
+
+    public int GetLengthOfCameraData()
+    {
+        return UpperCamera.GetLengthOfDataset();
+    }
+
+    public void CleanCameraData()
+    {
+        UpperCamera.CleanDataMap();
     }
 
     /// <summary>
@@ -129,6 +139,10 @@ public class VehicleHardWare
         RightLidar.RecoverAngle();
     }
 
+    /// <summary>
+    /// Convert vehicle position to matrix
+    /// </summary>
+    /// <returns>DenseMatrix</returns>
     private DenseMatrix UpdateVehiclePosition()
     {
         float[,] tempPos = new float[,] { { Target.GetComponent<Transform>().position.x,

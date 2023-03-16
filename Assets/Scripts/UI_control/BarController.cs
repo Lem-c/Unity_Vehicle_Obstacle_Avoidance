@@ -60,6 +60,13 @@ public class BarController : MonoBehaviour
         if (Vehicle.GetComponent<NAVCar>().enabled)
         {
             Vehicle.GetComponent<NAVCar>().ChangeStartState();
+            return;
+        }
+
+        if(Vehicle.GetComponent<DWACar>().enabled)
+        {
+            Vehicle.GetComponent <DWACar>().ChangeStartState();
+            return;
         }
     }
 

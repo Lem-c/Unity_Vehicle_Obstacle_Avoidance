@@ -738,6 +738,8 @@ GameObject:
   - component: {fileID: 587212441}
   - component: {fileID: 587212440}
   - component: {fileID: 587212444}
+  - component: {fileID: 587212446}
+  - component: {fileID: 587212447}
   m_Layer: 0
   m_Name: Vehicle
   m_TagString: Player
@@ -798,13 +800,35 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 587212439}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceca0c660cda0ac4a9fca940afc560c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 0
-  nowBreak: 0
+--- !u!114 &587212446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 587212439}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eea32615bed928d4c8a51f1282d94609, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &587212447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 587212439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67f7dc540c118ff41816de2b324e8298, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &651555104
 GameObject:
   m_ObjectHideFlags: 0
