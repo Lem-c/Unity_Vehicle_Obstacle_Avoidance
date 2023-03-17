@@ -43,7 +43,6 @@ namespace VehicleEqipment
                 out hit,
                 MaxRayDistance, LayerMask))
             {
-
                 return true;
             }
 

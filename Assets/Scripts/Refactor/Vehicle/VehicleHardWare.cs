@@ -68,7 +68,7 @@ public class VehicleHardWare
     {
         var cam = GameObject.FindWithTag("SceneView").GetComponent<Camera>();
         var isClosing_ = false;
-        UpperCamera.ProcessCamera(cam, 0.5f, 0.6f, ref isClosing_);
+        UpperCamera.ProcessCamera(cam, 0.38f, 0.21f, ref isClosing_);                 // Set weight for angle and distance
 
         bool[] result = {isClosing_, UpperCamera.choice };
         return result;
@@ -88,6 +88,8 @@ public class VehicleHardWare
     {
         UpperCamera.CleanDataMap();
     }
+
+    /****************** Get Methods **************************/
 
     /// <summary>
     /// Get lidar distance measurement result according to the type

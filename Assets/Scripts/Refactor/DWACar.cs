@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 public class DWACar : VehicleController
 {
     // Key device params
-    private readonly float MaxRayDistance = 13f;
+    private readonly float MaxRayDistance = 10f;
     public Dashboard dashboard;
 
 
@@ -15,12 +15,12 @@ public class DWACar : VehicleController
         Vehicle = GameObject.FindWithTag("Player");
         dashboard = new Dashboard();
 
-        float[] tempWeight = { 0.134f, 0.63f };
+        float[] tempWeight = { 0.134f, 0.05f };
 
         SetDefaultParam(SelfScale);
         // TODO: When updating 'LightCar' using method: SetDefaultParam,
         // MaxSpeed.. in vdp class would not update correspondingly
-        vdp = new VecicleDecisionPlatform(Vehicle, 3, MaxSpeed, MaxRayDistance, "DWA", 20f, tempWeight);
+        vdp = new VecicleDecisionPlatform(Vehicle, 3, MaxSpeed, MaxRayDistance, "DWA", 1f, tempWeight);
     }
 
     // Update is called once per frame
@@ -72,7 +72,7 @@ public class DWACar : VehicleController
     /// </summary>
     protected override void ProcessDecision()
     {
-        // vdp.GenerateStraightMovement();
+        vdp.GenerateStraightMovement();
         vdp.GenerateTurningMovement();
         // Debug.Log(vdp.stepManager.GetLengthOfRecord());
 

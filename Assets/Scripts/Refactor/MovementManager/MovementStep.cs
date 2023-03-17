@@ -27,7 +27,7 @@ namespace ActionManager
         }
 
         /***********MainDecisionMaker*********/
-        DecisionMaker decMaker;                // Have to set an decision maker
+        
 
         /***********Memories******************/
         // Predicted next movement record list
@@ -41,12 +41,17 @@ namespace ActionManager
         protected int SideVisualAngle;         // The range of left/right radar could reach(If equipped)
         protected float StraightBias = 7.1f;   // Normally the distance estimated ahead is longer 
         protected bool isForwardBlocked = false;// True if forward is blocked by pbstacle
+        protected int StepSize = 10;           // The maximum steps can generate 
 
         /***********Methods Interface************/
         public abstract void StrightMovementDecisionMaker(float _speed, float _dist);
         // TODO: optimize this method
         public abstract void TurningDecisionMaker(float _speed, float _leftDis, float _rightDis, bool _isForwardblocked);
         public abstract void PrintMessage();
+        public void SetStepSize(int _newSize)
+        {
+            StepSize = _newSize;
+        }
 
         /***********Value Get/Set Methods*********/
         // Return current estimated next action

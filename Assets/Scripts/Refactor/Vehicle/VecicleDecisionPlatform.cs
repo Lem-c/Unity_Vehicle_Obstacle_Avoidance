@@ -1,5 +1,4 @@
 using ActionManager;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class VecicleDecisionPlatform
@@ -35,12 +34,22 @@ public class VecicleDecisionPlatform
     /// </summary>
     public void GenerateStraightMovement()
     {
-        // Process lidar detection first
-        motherBoard.StraightLidarDetctation();
-        // Get distance and speed information
-        stepManager.StrightMovementDecisionMaker(
-                    Target.GetComponent<LightCar>().GetCurrentSpeed(),
-                    (float)motherBoard.DistanceToObstacle());
+        if (sensorType == "Smooth")
+        {
+            // Process lidar detection first
+            motherBoard.StraightLidarDetctation();
+            // Get distance and speed information
+            stepManager.StrightMovementDecisionMaker(
+                        Target.GetComponent<LightCar>().GetCurrentSpeed(),
+                        (float)motherBoard.DistanceToObstacle());
+        }
+        else if (sensorType == "DWA")
+        {
+            motherBoard.StraightLidarDetctation();
+            stepManager.StrightMovementDecisionMaker(
+                        Target.GetComponent<DWACar>().GetCurrentSpeed(),
+                        (float)motherBoard.DistanceToObstacle());
+        }
     }
 
     /// <summary>
@@ -67,10 +76,11 @@ public class VecicleDecisionPlatform
             // Generate decisions
             if (state[1] == true)
             {
+                stepManager.SetStepSize(motherBoard.GetLengthOfCameraData());   // Update the windows size
+                // Do window loop
                 for (int i = 0; i < motherBoard.GetLengthOfCameraData(); i++)
                 {
                     var data = motherBoard.GetCameraData(i);                    // data array contains angle and distance
-                    // List<float> data = new List<float>{0.1f, 0.2f};
 
                     if(data == null || data.Count < 1) {
                         continue;                                               // catch when without no mouse click action
@@ -78,13 +88,14 @@ public class VecicleDecisionPlatform
 
                     // Debug.Log(data[0] + ", " + data[1]);
 
+                    // Process DM to add data into lists
                     stepManager.TurningDecisionMaker(Target.GetComponent<DWACar>().GetCurrentSpeed(),
                                                     data[0], data[1], state[0]);
                     // stepManager.PrintMessage();
                 }
             }
 
-            // clean storage
+            // clean storage of a window
             motherBoard.CleanCameraData();
         }
     }

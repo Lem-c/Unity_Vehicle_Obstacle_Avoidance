@@ -13,8 +13,8 @@ namespace VehicleEqipment.Camera
         
         public bool choice;
 
-        private readonly GameObject Target;                  // The object where camera would be installed
-        private Vector3 destination;                         // The target destination
+        public static GameObject Target;                  // The object where camera would be installed
+        public static Vector3 destination;                         // The target destination
 
         // List recording all distances measured to obstalces
         private List<List<float>> obsDistanceMap;
@@ -26,7 +26,7 @@ namespace VehicleEqipment.Camera
                               bool _choice = false)
         {
             Target = target;
-            destination = new Vector3(5, 5, 5);
+            destination = new Vector3(2, 5, 5);
             this.choice = _choice;
             obsDistanceMap = new List<List<float>>();
 
@@ -57,7 +57,7 @@ namespace VehicleEqipment.Camera
             {
                 // Update data and record
                 LerpUpdate(_cam);
-                _out = true;
+                _out = IsMovingClose2Target(_angleWeight, _disWeight);
             }
 
             choice = !choice;
@@ -226,8 +226,8 @@ namespace VehicleEqipment.Camera
                 RayDetection(_target.position, tempDirection);
 
                 // Add distacen into the lists
-                obsDistanceMap.Add(new List<float> { 
-                    currentBias,
+                obsDistanceMap.Add(new List<float> {
+                    tempBias,
                     DistanceTo()
                 });
 
