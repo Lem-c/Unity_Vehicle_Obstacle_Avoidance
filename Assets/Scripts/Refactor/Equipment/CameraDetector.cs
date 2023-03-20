@@ -109,6 +109,7 @@ namespace VehicleEqipment.Camera
         /// <returns>bool value</returns>
         public bool IsMovingClose2Target(float _angleWeight, float _disWeight)
         {
+            //TODO: this seems not work
             var angle = IsAngleShrink(Target.GetComponent<Transform>().position, destination,
                                       lastAngle);
             var dis = IsClosingTo(Target.GetComponent<Transform>().position, destination, lastDis);
@@ -223,7 +224,10 @@ namespace VehicleEqipment.Camera
                 tempDirection = Quaternion.Euler(0, tempBias, 0) *
                                 _target.TransformDirection(Vector3.forward);
 
-                RayDetection(_target.position, tempDirection);
+                if(!RayDetection(_target.position, tempDirection))
+                {
+                    tempBias = 0;
+                }
 
                 // Add distacen into the lists
                 obsDistanceMap.Add(new List<float> {
@@ -258,6 +262,12 @@ namespace VehicleEqipment.Camera
                 // Update destination
                 Debug.Log("Destinaton updated");
                 destination = hit.point;
+
+                if(GameObject.FindWithTag("MousePoint") != null)
+                {
+                    var cube = GameObject.FindWithTag("MousePoint");
+                    cube.transform.position = destination;
+                }
             }
         }
 
@@ -274,7 +284,7 @@ namespace VehicleEqipment.Camera
                   / (Mathf.Sqrt(_from[0] * _from[0]) + (_from[1] * _from[1])
                           * Mathf.Sqrt(_to[0] * _to[0]) + (_to[1] * _to[1])));
 
-            return radian / Mathf.PI * 180;
+            return Math.Abs(180 - radian / Mathf.PI * 180);
         }
 
         /// <summary>

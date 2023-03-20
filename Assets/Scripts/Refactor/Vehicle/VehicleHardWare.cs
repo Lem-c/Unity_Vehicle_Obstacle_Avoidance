@@ -7,7 +7,6 @@ using VehicleEqipment.Lidar;
 
 public class VehicleHardWare
 {
-
     private GameObject Target;           // The main vehicle
 
     private int DetectiveLayer;          // The target layer where obstacles located
@@ -68,7 +67,7 @@ public class VehicleHardWare
     {
         var cam = GameObject.FindWithTag("SceneView").GetComponent<Camera>();
         var isClosing_ = false;
-        UpperCamera.ProcessCamera(cam, 0.38f, 0.21f, ref isClosing_);                 // Set weight for angle and distance
+        UpperCamera.ProcessCamera(cam, 0.39f, 0.21f, ref isClosing_);                 // Set weight for angle and distance
 
         bool[] result = {isClosing_, UpperCamera.choice };
         return result;

@@ -122,7 +122,7 @@ public abstract class VehicleController : MonoBehaviour
     /// Method used with 'Operation()' 
     /// Guide vehilce movement by selecting actions
     /// </summary>
-    private void ActionApply()
+    protected void ActionApply()
     {
         if (currentMove == MovementStep.MoveMent.MoveForward)
         {
@@ -191,6 +191,16 @@ public abstract class VehicleController : MonoBehaviour
         return isStart_;
     }
 
+    protected void ChangeCurrentMove(MovementStep.MoveMent _newStep)
+    {
+        currentMove = _newStep;
+    }
+
+
+    protected MovementStep.MoveMent GetCurrentMove()
+    {
+        return currentMove;
+    }
     /// <summary>
     /// Useed in UI-control button method
     /// Change the start position of vehicle

@@ -1,10 +1,11 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class DWACar : VehicleController
 {
     // Key device params
-    private readonly float MaxRayDistance = 10f;
+    private readonly float MaxRayDistance = 17f;
     public Dashboard dashboard;
 
 
@@ -15,7 +16,10 @@ public class DWACar : VehicleController
         Vehicle = GameObject.FindWithTag("Player");
         dashboard = new Dashboard();
 
-        float[] tempWeight = { 0.134f, 0.05f };
+        float[] tempWeight = { 0.094f, 0.13f, 0.11f };
+        /**
+         * Remember to adjust the camera weight either
+         */
 
         SetDefaultParam(SelfScale);
         // TODO: When updating 'LightCar' using method: SetDefaultParam,
@@ -64,6 +68,33 @@ public class DWACar : VehicleController
     {
         ChangeCurrentSpeed(0);
         isStart_ = false;
+    }
+
+    /// <summary>
+    /// Override method of how the operations are taken out from queue
+    /// </summary>
+    /// <exception cref="System.Exception"></exception>
+    private new void QueueCommandOperation()
+    {
+        if (vdp is null)
+        {
+            throw new System.Exception("Null step manager: VecicleDecisionProcess");
+        }
+
+        while (vdp.lidarHelper.GetLengthOfRecord() > 1)
+        {
+            ChangeCurrentMove(vdp.lidarHelper.PopNextMove());
+            // Debug.Log(GetCurrentMove());
+            ActionApply();
+        }
+
+        // Continue action execution
+        while (vdp.stepManager.GetLengthOfRecord() > 1)
+        {
+            ChangeCurrentMove(vdp.stepManager.PopNextMove());
+            // Debug.Log(GetCurrentMove());
+            ActionApply();
+        }
     }
 
     /// <summary>

@@ -15,17 +15,22 @@ public class VecicleDecisionPlatform
     /// Main Decision determination model
     /// </summary>
     public MovementStep stepManager;
+    public MovementStep lidarHelper;
 
     public string sensorType;
 
-    public VecicleDecisionPlatform(GameObject _car, int _layer, float _maxSpeed, float _MaxRayDistance, string _DType="Smooth",
+    public VecicleDecisionPlatform(GameObject _car, int _layer, float _maxSpeed, float _maxRayDistance, string _DType="Smooth",
                                    float _startAngle = 0, float[] _weight = null)
     {
         Target = _car;
-        motherBoard = new VehicleHardWare(Target, _MaxRayDistance, _layer);
+        motherBoard = new VehicleHardWare(Target, _maxRayDistance, _layer);
         // TODO: Exchange this as switchable/decleared parameter
         sensorType = _DType;
-        stepManager = StepController.GenerateStepManager(_DType, _maxSpeed, _MaxRayDistance, _startAngle, _weight);
+        stepManager = StepController.GenerateStepManager(_DType, _maxSpeed, _maxRayDistance, _startAngle, _weight);
+        if (!_DType.Equals("Smooth"))
+        {
+            lidarHelper = StepController.GenerateStepManager("Smooth", _maxSpeed, _maxRayDistance - (_maxRayDistance*0.7f));
+        }
     }
 
     /************All Initialize/decision making methods***************/
@@ -46,7 +51,7 @@ public class VecicleDecisionPlatform
         else if (sensorType == "DWA")
         {
             motherBoard.StraightLidarDetctation();
-            stepManager.StrightMovementDecisionMaker(
+            lidarHelper.StrightMovementDecisionMaker(
                         Target.GetComponent<DWACar>().GetCurrentSpeed(),
                         (float)motherBoard.DistanceToObstacle());
         }
@@ -94,6 +99,16 @@ public class VecicleDecisionPlatform
                     // stepManager.PrintMessage();
                 }
             }
+
+            // Lidar Assistance
+            // Process lidar detection first
+            motherBoard.LeftLidarDetectation();
+            motherBoard.RightLidarDetectation();
+
+            lidarHelper.TurningDecisionMaker((float)Target.GetComponent<DWACar>().GetCurrentSpeed(),
+                                             motherBoard.DistanceToObstacle(2),
+                                             motherBoard.DistanceToObstacle(3),
+                                             motherBoard.GetIsForwardBlocked());
 
             // clean storage of a window
             motherBoard.CleanCameraData();

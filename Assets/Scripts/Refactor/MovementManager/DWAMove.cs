@@ -22,7 +22,7 @@ public class DWAMove : StepController, DynamicWindow
 
     /// <param name="_maxSpeed"></param>
     /// <param name="_initAngle"></param>
-    /// <param name="_weight">{speedWeight, destinationWeight}</param>
+    /// <param name="_weight">{speedWeight, destinationWeight, obstacleBias}</param>
     /// <param name="_bias">MaxDecisionBias = _bias</param>
     /// <param name="_size">The size of windows</param>
     public DWAMove(float _maxSpeed, float _initAngle, float[] _weight, float _bias = 0.05f, int _size=10) : base(_bias)
@@ -57,6 +57,7 @@ public class DWAMove : StepController, DynamicWindow
                 var farObs = distanceSet[GetMaxObjectiveInList()];
                 // Add new movement to avoid obstacles
                 TurningDegreeAdd(tempAngle, farObs, _isClose);
+                // Debug.Log(_isClose);
 
                 evalSet.Clear();
                 angleSet.Clear();
@@ -66,7 +67,7 @@ public class DWAMove : StepController, DynamicWindow
                 return;
             }
 
-            Debug.Log(DwaObjective(_speed, _angle, _isClose, _dis2obs));
+            // Debug.Log(DwaObjective(_speed, _angle, _isClose, _dis2obs));
 
             // Add evaluated parameters and obstacle angles into list
             evalSet.Add(DwaObjective(_speed, _angle, _isClose, _dis2obs));
@@ -85,11 +86,12 @@ public class DWAMove : StepController, DynamicWindow
     {
         // TODO: array check || bias set
 
-        var _bias = 0.1f;
+        /*Debug.Log(SpeedGain(_speed, weightList[0]) + ", " + DestinationGain(_angle, weightList[1], _isClose) + ", " +
+            ObstaclePenalty(_obsL, weightList[2]));*/
 
         return SpeedGain(_speed, weightList[0])
              + DestinationGain(_angle, weightList[1], _isClose)
-             + ObstaclePenalty(_obsL, _bias);
+             + ObstaclePenalty(_obsL, weightList[2]);
     }
     public float DwaObjective(float _speedGain, float _destinationGain, float _obsPenalty)
     {
@@ -100,6 +102,7 @@ public class DWAMove : StepController, DynamicWindow
     /****************** Tuning method *************************************/
 
     // TODO
+    // Decrease one when encountered different situation
     public void UpdateWeight()
     {
         weightList[0] += 1;
@@ -114,6 +117,7 @@ public class DWAMove : StepController, DynamicWindow
         try {
             // Call int perameter using float cause unavoidable system crash 
             int index = evalSet.FindIndex(x => Math.Abs(x - evalSet.Max()) < 0.1f);
+
             return index;
         }
         catch(Exception) {
@@ -152,25 +156,32 @@ public class DWAMove : StepController, DynamicWindow
     {
         if(_dis2obs < 0)
         {
-            return -10 * _bias;                                     // Add as compensation
+            return 10 * _bias;                                     // Add as compensation
         }
 
         return -_bias * (float)Math.Pow(_dis2obs/10,2) + MaxDecisionBias*10;
     }
 
+    /// <summary>
+    /// Determine whether vehicle moved too fast to reach the destination
+    /// </summary>
+    /// <param name="_speed"></param>
+    /// <param name="_weight"></param>
+    /// <param name="_deceleration"></param>
+    /// <returns></returns>
     public float SpeedGain(float _speed, float _weight, float _deceleration=1)
     {
         float result = 0;                           // The output result
 
         // speed gain
-        if(_speed < MaxSpeed / 2)
+        result += -1 * (_speed * _speed) + (MaxSpeed/10 - MaxDecisionBias*10) * _speed;
+
+        // Restriction
+        if(result < -0.4f)
         {
-            result += _speed * _weight;
+            result = -0.5f;
         }
-        else
-        {
-            result -= _speed * _weight;
-        }
+
         // break penalty
         result -= (_speed % _deceleration + 0.1f) * (_weight-MaxDecisionBias*10);
 
@@ -182,12 +193,9 @@ public class DWAMove : StepController, DynamicWindow
     /// </summary>
     private void TurningDegreeAdd(float _angle, float _dis2obs=0, bool _isClosing=false)
     {
-        if(_dis2obs == -1)
-        {
-            return;
-        }
+        var viewAngle = Math.Abs(_angle/10)+1;
 
-        var viewAngle = Math.Abs(_angle / -15f + UnityEngine.Random.Range(0, 3));
+        // Debug.Log(_isClosing);
 
         if(_isClosing)
         {
@@ -209,11 +217,11 @@ public class DWAMove : StepController, DynamicWindow
         {
             if(GetParallelVectorDistance() > 0)
             {
-                AddNumOfTurning(2, 1);
+                AddNumOfTurning((int)viewAngle + UnityEngine.Random.Range(0, 2), 1);
             }
             else
             {
-                AddNumOfTurning(2, -1);
+                AddNumOfTurning((int)viewAngle + UnityEngine.Random.Range(0, 2), -1);
             }
         }
     }
@@ -237,6 +245,13 @@ public class DWAMove : StepController, DynamicWindow
         }
     }
 
+    /// <summary>
+    /// Generate two vectors from left and right side of vehicle
+    /// Compare the distance that from them to the destination
+    /// Take the smaller one
+    /// </summary>
+    /// <param name="_bias"></param>
+    /// <returns></returns>
     private float GetParallelVectorDistance(float _bias=5)
     {
         float x = CameraDetector.Target.transform.position.x;

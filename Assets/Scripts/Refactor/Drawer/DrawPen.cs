@@ -87,6 +87,11 @@ public class DrawPen : MonoBehaviour
             return Vehicle.GetComponent<NAVCar>().GetCurrentState();
         }
 
+        if (Vehicle.GetComponent<DWACar>().enabled)
+        {
+            return Vehicle.GetComponent<DWACar>().GetCurrentState();
+        }
+
         return false;
     }
 }
