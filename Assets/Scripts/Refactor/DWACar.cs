@@ -1,11 +1,10 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class DWACar : VehicleController
 {
     // Key device params
-    private readonly float MaxRayDistance = 17f;
+    private readonly float MaxRayDistance = 12f;
     public Dashboard dashboard;
 
 

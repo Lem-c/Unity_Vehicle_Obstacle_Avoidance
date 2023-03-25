@@ -9,9 +9,7 @@ namespace VehicleEqipment.Camera
     {
         // Recorder
         float lastAngle = 360f;
-        float lastDis = 1000f;
-        
-        public bool choice;
+        float bestClosestDis = 1000f;
 
         public static GameObject Target;                  // The object where camera would be installed
         public static Vector3 destination;                         // The target destination
@@ -22,12 +20,18 @@ namespace VehicleEqipment.Camera
 
         public CameraDetector(GameObject target,
                               int _layer, float _rayDistance, 
-                              float _sideVisualAngle = 0,
-                              bool _choice = false)
+                              float _sideVisualAngle = 0)
         {
             Target = target;
-            destination = new Vector3(2, 5, 5);
-            this.choice = _choice;
+
+            if (GameObject.FindWithTag("MousePoint") == null) {
+                Debug.LogWarning("Fail to find cube destination, set TAG first");
+            }
+            else
+            {
+                destination = GameObject.FindWithTag("MousePoint").transform.position;
+            }
+
             obsDistanceMap = new List<List<float>>();
 
             if (Target == null || Target.IsUnityNull())
@@ -49,25 +53,16 @@ namespace VehicleEqipment.Camera
         /// <param name="_out">External value assignment: whether moving to the target</param>
         public void ProcessCamera(UnityEngine.Camera _cam, float _angleWeight, float _disWeight, ref bool _out)
         {
-            if (choice)
-            {
-                _out = IsMovingClose2Target(_angleWeight, _disWeight);
-            }
-            else
-            {
-                // Update data and record
-                LerpUpdate(_cam);
-                _out = IsMovingClose2Target(_angleWeight, _disWeight);
-            }
-
-            choice = !choice;
+            _out = IsMovingClose2Target(_angleWeight, _disWeight);
+            // Update data and record
+            LerpUpdate(_cam);
         }
 
         /*************** Internal methods *****************/
         private void AddDistance2ObsIntoList()
         {
-            int leftDetection = UnityEngine.Random.Range(3,5);
-            int rightDetection = UnityEngine.Random.Range(3,5);
+            int leftDetection = UnityEngine.Random.Range(5,8);
+            int rightDetection = UnityEngine.Random.Range(5,8);
 
             RangRayDetection(Target.GetComponent<Transform>(), -1, leftDetection);
             RangRayDetection(Target.GetComponent<Transform>(), 1, rightDetection);
@@ -112,10 +107,13 @@ namespace VehicleEqipment.Camera
             //TODO: this seems not work
             var angle = IsAngleShrink(Target.GetComponent<Transform>().position, destination,
                                       lastAngle);
-            var dis = IsClosingTo(Target.GetComponent<Transform>().position, destination, lastDis);
+            var dis = IsClosingTo(Target.GetComponent<Transform>().position, destination);
 
             float result = DWAMove.Discriminator(angle) * _angleWeight;
             result += DWAMove.Discriminator(dis) * _disWeight;
+
+            // Debug.Log("Angle: " + DWAMove.Discriminator(angle) + " Dis: " + DWAMove.Discriminator(dis));
+            Debug.Log(DWAMove.ActiveFunction(result));
 
             return DWAMove.ActiveFunction(result);
         }
@@ -124,8 +122,7 @@ namespace VehicleEqipment.Camera
         {
             var angle = IsAngleShrink(Target.GetComponent<Transform>().position, destination,
                                       _lashAngle);
-            var dis = IsClosingTo(Target.GetComponent<Transform>().position, destination,
-                                      _lastDis);
+            var dis = IsClosingTo(Target.GetComponent<Transform>().position, destination);
 
             float result = DWAMove.Discriminator(angle) * _angleWeight;
             result += DWAMove.Discriminator(dis) * _disWeight;
@@ -142,7 +139,7 @@ namespace VehicleEqipment.Camera
         public void LerpUpdate(UnityEngine.Camera _cam)
         {
             lastAngle = CalculateAngle(Target.GetComponent<Transform>().position, destination);
-            lastDis = Vector3.Distance(Target.GetComponent<Transform>().position, destination);
+
             UpdateDestination(_cam);
             AddDistance2ObsIntoList();
         }
@@ -155,11 +152,17 @@ namespace VehicleEqipment.Camera
         /// <param name="_vehicle">vehilce vecotr.Forward</param>
         /// <param name="_destination">Calculating by minus vehilce point and destination point</param>
         /// <returns></returns>
-        public bool IsAngleShrink(Vector3 _vehicle, Vector3 _destination, float _orginalAngle)
+        public bool IsAngleShrink(Vector3 _vehicle, Vector3 _destination, float _lstAngle)
         {
-            if(_orginalAngle < CalculateAngle(_vehicle, _destination))
+            // Debug.Log("Last: " + _lstAngle + "Current: " + CalculateAngle(_vehicle, _destination));
+
+            var val = CalculateAngle(_vehicle, _destination) - _lstAngle;
+
+            if (val < 0)
             {
                 return true;
+            }else if(val == 0) {
+                return DWAMove.ActiveFunction(UnityEngine.Random.Range(-1f, 1f));
             }
 
             return false;
@@ -172,10 +175,15 @@ namespace VehicleEqipment.Camera
         /// <param name="_vehicle">vehilce vecotr.Forward</param>
         /// <param name="_destination">detination vector</param>
         /// <returns></returns>
-        public bool IsClosingTo(Vector3 _vehicle, Vector3 _destination, float _lastDis)
+        public bool IsClosingTo(Vector3 _vehicle, Vector3 _destination)
         {
-            if(Vector3.Distance(_vehicle, _destination) <= _lastDis)
+            // Debug.Log(Vector3.Distance(_vehicle, _destination) + ", " + _lastDis);
+
+            var val = Vector3.Distance(_vehicle, _destination);
+
+            if ( val <= bestClosestDis)
             {
+                bestClosestDis = val;
                 return true;
             }
 
@@ -223,12 +231,7 @@ namespace VehicleEqipment.Camera
                 // Add 'tempBias' to the y-axis
                 tempDirection = Quaternion.Euler(0, tempBias, 0) *
                                 _target.TransformDirection(Vector3.forward);
-
-                if(!RayDetection(_target.position, tempDirection))
-                {
-                    tempBias = 0;
-                }
-
+                          
                 // Add distacen into the lists
                 obsDistanceMap.Add(new List<float> {
                     tempBias,
@@ -261,6 +264,10 @@ namespace VehicleEqipment.Camera
             {
                 // Update destination
                 Debug.Log("Destinaton updated");
+                // Reset recorder
+                lastAngle = 360f;
+                bestClosestDis = 1000f;
+
                 destination = hit.point;
 
                 if(GameObject.FindWithTag("MousePoint") != null)
@@ -284,7 +291,7 @@ namespace VehicleEqipment.Camera
                   / (Mathf.Sqrt(_from[0] * _from[0]) + (_from[1] * _from[1])
                           * Mathf.Sqrt(_to[0] * _to[0]) + (_to[1] * _to[1])));
 
-            return Math.Abs(180 - radian / Mathf.PI * 180);
+            return Math.Abs(radian / Mathf.PI * 180 - 180);
         }
 
         /// <summary>

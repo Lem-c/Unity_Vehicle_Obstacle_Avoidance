@@ -63,14 +63,15 @@ public class VehicleHardWare
     }
 
     /************* Camera detection result ***********************/
-    public bool[] CameraDetect()
+    public bool CameraDetect()
     {
         var cam = GameObject.FindWithTag("SceneView").GetComponent<Camera>();
         var isClosing_ = false;
-        UpperCamera.ProcessCamera(cam, 0.39f, 0.21f, ref isClosing_);                 // Set weight for angle and distance
+        UpperCamera.ProcessCamera(cam, 0.3f, 0.35f, ref isClosing_);                 // Set weight for angle and distance
 
-        bool[] result = {isClosing_, UpperCamera.choice };
-        return result;
+        // Debug.Log(isClosing_);
+
+        return isClosing_;
     }
 
     public List<float> GetCameraData(int index)

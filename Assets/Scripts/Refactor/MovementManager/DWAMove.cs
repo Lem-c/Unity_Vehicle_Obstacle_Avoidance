@@ -195,8 +195,6 @@ public class DWAMove : StepController, DynamicWindow
     {
         var viewAngle = Math.Abs(_angle/10)+1;
 
-        // Debug.Log(_isClosing);
-
         if(_isClosing)
         {
             if (viewAngle < 0 && (lastDis - _dis2obs) > 0)
@@ -215,13 +213,18 @@ public class DWAMove : StepController, DynamicWindow
         }
         else
         {
-            if(GetParallelVectorDistance() > 0)
+            // Debug.Log("Last: " + lastAngle + " Current: " + _angle);
+
+            if ( lastAngle*_angle > 0 && lastAngle > _angle)
             {
-                AddNumOfTurning((int)viewAngle + UnityEngine.Random.Range(0, 2), 1);
-            }
-            else
-            {
-                AddNumOfTurning((int)viewAngle + UnityEngine.Random.Range(0, 2), -1);
+                if (GetParallelVectorDistance() > 0)
+                {
+                    AddNumOfTurning((int)viewAngle + UnityEngine.Random.Range(0, 2), 1);
+                }
+                else
+                {
+                    AddNumOfTurning((int)viewAngle + UnityEngine.Random.Range(0, 2), -1);
+                }
             }
         }
     }
@@ -283,6 +286,7 @@ public class DWAMove : StepController, DynamicWindow
     /// <returns>bool</returns>
     public static bool ActiveFunction(float _val, float _threshold = 0)
     {
+
         if (_val < _threshold)
         {
             return false;

@@ -75,36 +75,34 @@ public class VecicleDecisionPlatform
         }
         else if (sensorType == "DWA")
         {
-            // Process camera sensor
+            // Process camera sensor => is close to the target
             var state = motherBoard.CameraDetect();
 
             // Generate decisions
-            if (state[1] == true)
+            stepManager.SetStepSize(motherBoard.GetLengthOfCameraData());   // Update the windows size
+            // Do window loop
+            for (int i = 0; i < motherBoard.GetLengthOfCameraData(); i++)
             {
-                stepManager.SetStepSize(motherBoard.GetLengthOfCameraData());   // Update the windows size
-                // Do window loop
-                for (int i = 0; i < motherBoard.GetLengthOfCameraData(); i++)
-                {
-                    var data = motherBoard.GetCameraData(i);                    // data array contains angle and distance
+                // data array contains angle and distance
+                var data = motherBoard.GetCameraData(i);                    
 
-                    if(data == null || data.Count < 1) {
-                        continue;                                               // catch when without no mouse click action
-                    }
-
-                    // Debug.Log(data[0] + ", " + data[1]);
-
-                    // Process DM to add data into lists
-                    stepManager.TurningDecisionMaker(Target.GetComponent<DWACar>().GetCurrentSpeed(),
-                                                    data[0], data[1], state[0]);
-                    // stepManager.PrintMessage();
+                // catch when without no mouse click action
+                if (data == null || data.Count < 1) {
+                    continue;                                               
                 }
+
+                // Debug.Log("Angle: " + data[0] + " dis2obs: " + data[1]);
+
+                // Process DM to add data into lists
+                stepManager.TurningDecisionMaker(Target.GetComponent<DWACar>().GetCurrentSpeed(),
+                                                data[0], data[1], state);
+                // stepManager.PrintMessage();
             }
 
             // Lidar Assistance
-            // Process lidar detection first
+            // Process lidar detection first : obstacle avoidance
             motherBoard.LeftLidarDetectation();
             motherBoard.RightLidarDetectation();
-
             lidarHelper.TurningDecisionMaker((float)Target.GetComponent<DWACar>().GetCurrentSpeed(),
                                              motherBoard.DistanceToObstacle(2),
                                              motherBoard.DistanceToObstacle(3),
