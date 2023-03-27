@@ -113,7 +113,7 @@ namespace VehicleEqipment.Camera
             result += DWAMove.Discriminator(dis) * _disWeight;
 
             // Debug.Log("Angle: " + DWAMove.Discriminator(angle) + " Dis: " + DWAMove.Discriminator(dis));
-            Debug.Log(DWAMove.ActiveFunction(result));
+            // Debug.Log(DWAMove.ActiveFunction(result));
 
             return DWAMove.ActiveFunction(result);
         }

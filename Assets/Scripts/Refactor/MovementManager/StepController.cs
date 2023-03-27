@@ -68,14 +68,14 @@ namespace ActionManager
 
         /*************** Factory ***************************/
         public static StepController GenerateStepManager(string _type, float _maxSpeed, float _MaxRayDistance,
-                                                         float _startAngle=0, float[] _weight=null)
+                                                         float _startAngle=0, float[] _weight=null, float _MaxDecisionBias=0.05f)
         {
             switch  (_type)
             {
                 case "Smooth":
-                    return new SmoothMove(_maxSpeed, _MaxRayDistance);
+                    return new SmoothMove(_maxSpeed, _MaxRayDistance, _MaxDecisionBias);
                 case "DWA":
-                    return new DWAMove(_maxSpeed, _startAngle, _weight);
+                    return new DWAMove(_maxSpeed, _startAngle, _weight, _MaxDecisionBias);
                 default:
                     return null;
 

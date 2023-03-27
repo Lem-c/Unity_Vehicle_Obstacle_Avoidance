@@ -148,7 +148,8 @@ public class DWAMove : StepController, DynamicWindow
         // Evaluate whether move towards to the destination
         result += (float)gap * _weight * Discriminator(_isClose);
 
-        lastAngle = _angle;                                         // update angle
+        // update angle
+        lastAngle = _angle;                                         
         return result;
     }
 
@@ -191,40 +192,52 @@ public class DWAMove : StepController, DynamicWindow
     /// <summary>
     /// Add turning operations according to the angle
     /// </summary>
+    /// <param name="_angle">Selected angle with heighest objective value</param>
     private void TurningDegreeAdd(float _angle, float _dis2obs=0, bool _isClosing=false)
     {
         var viewAngle = Math.Abs(_angle/10)+1;
 
         if(_isClosing)
         {
-            if (viewAngle < 0 && (lastDis - _dis2obs) > 0)
+            if (lastDis - _dis2obs <= 0)
             {
-                AddNumOfTurning((int)viewAngle, -1);
-            }
-            else if (viewAngle > 0 && (lastDis - _dis2obs) > 0)
-            {
-                AddNumOfTurning((int)viewAngle, 1);
+                // Moving close to the target: Straight || No obstacle
+                AddNewRecord(MoveMent.MoveForward);
             }
             else
             {
-                // Random move
-                RandomTurning();
+                if (_angle == 0)
+                {
+                    RandomTurning();
+                    return;
+                }
+
+                if(_angle > 0)
+                {
+                    AddNumOfTurning((int)viewAngle, 1);
+                }
+                else 
+                {
+                    AddNumOfTurning((int)viewAngle, -1);
+                }
+                // Encountered obstacle
             }
         }
         else
         {
             // Debug.Log("Last: " + lastAngle + " Current: " + _angle);
+            // check same direction and compare angle
+            RecoverAngle(_angle, lastAngle);
 
-            if ( lastAngle*_angle > 0 && lastAngle > _angle)
+            if (GetParallelVectorDistance() > 0 && lastAngle > 0)
             {
-                if (GetParallelVectorDistance() > 0)
-                {
-                    AddNumOfTurning((int)viewAngle + UnityEngine.Random.Range(0, 2), 1);
-                }
-                else
-                {
-                    AddNumOfTurning((int)viewAngle + UnityEngine.Random.Range(0, 2), -1);
-                }
+                // If turn right accounts more weight and prefer to turn right
+                AddNumOfTurning((int)viewAngle, 1);
+            }
+            else if(GetParallelVectorDistance() <= 0 && lastAngle < 0)
+            {
+                // If turn left accounts more weight and prefer to turn left
+                AddNumOfTurning((int)viewAngle, -1);
             }
         }
     }
@@ -239,7 +252,7 @@ public class DWAMove : StepController, DynamicWindow
             {
                 AddNewRecord(MoveMent.TurnRight);
             }
-            else
+            else if(_side < 0)
             {
                 AddNewRecord(MoveMent.TurnLeft);
             }
@@ -276,6 +289,25 @@ public class DWAMove : StepController, DynamicWindow
         float R_dis = right.magnitude;
 
         return L_dis - R_dis;
+    }
+
+    private void RecoverAngle(float _angle, float _lastAngle)
+    {
+        if (_angle * _lastAngle > 0)
+        {
+            var gap = Math.Abs(Math.Abs(_angle) - Math.Abs(_lastAngle));
+            var side = Discriminator(ActiveFunction(_angle));
+
+            AddNumOfTurning((int)gap, side);
+        }
+        // if opposite sign (differet side)
+        else
+        {
+            var gap = Mathf.Abs(_angle) + Mathf.Abs(_lastAngle);
+            var side = Discriminator(ActiveFunction(_lastAngle));
+
+            AddNumOfTurning((int)gap, -side);
+        }
     }
 
     /************************ Internal/External import methods ****************/

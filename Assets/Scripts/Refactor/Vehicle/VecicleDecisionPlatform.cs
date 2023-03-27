@@ -29,7 +29,8 @@ public class VecicleDecisionPlatform
         stepManager = StepController.GenerateStepManager(_DType, _maxSpeed, _maxRayDistance, _startAngle, _weight);
         if (!_DType.Equals("Smooth"))
         {
-            lidarHelper = StepController.GenerateStepManager("Smooth", _maxSpeed, _maxRayDistance - (_maxRayDistance*0.7f));
+            // Set _MaxDecisionBias either
+            lidarHelper = StepController.GenerateStepManager("Smooth", _maxSpeed, _maxRayDistance, 0, null, 1.5f);
         }
     }
 
@@ -75,6 +76,15 @@ public class VecicleDecisionPlatform
         }
         else if (sensorType == "DWA")
         {
+            // Lidar Assistance
+            // Process lidar detection first : obstacle avoidance
+            motherBoard.LeftLidarDetectation();
+            motherBoard.RightLidarDetectation();
+            lidarHelper.TurningDecisionMaker((float)Target.GetComponent<DWACar>().GetCurrentSpeed(),
+                                             motherBoard.DistanceToObstacle(2),
+                                             motherBoard.DistanceToObstacle(3),
+                                             motherBoard.GetIsForwardBlocked());
+
             // Process camera sensor => is close to the target
             var state = motherBoard.CameraDetect();
 
@@ -99,14 +109,7 @@ public class VecicleDecisionPlatform
                 // stepManager.PrintMessage();
             }
 
-            // Lidar Assistance
-            // Process lidar detection first : obstacle avoidance
-            motherBoard.LeftLidarDetectation();
-            motherBoard.RightLidarDetectation();
-            lidarHelper.TurningDecisionMaker((float)Target.GetComponent<DWACar>().GetCurrentSpeed(),
-                                             motherBoard.DistanceToObstacle(2),
-                                             motherBoard.DistanceToObstacle(3),
-                                             motherBoard.GetIsForwardBlocked());
+            // Debug.Log(stepManager.GetLengthOfRecord());
 
             // clean storage of a window
             motherBoard.CleanCameraData();

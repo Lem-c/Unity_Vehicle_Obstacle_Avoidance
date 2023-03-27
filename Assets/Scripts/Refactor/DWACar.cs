@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 public class DWACar : VehicleController
 {
     // Key device params
-    private readonly float MaxRayDistance = 12f;
+    private readonly float MaxRayDistance = 13f;
     public Dashboard dashboard;
 
 
@@ -80,7 +80,7 @@ public class DWACar : VehicleController
             throw new System.Exception("Null step manager: VecicleDecisionProcess");
         }
 
-        while (vdp.lidarHelper.GetLengthOfRecord() > 1)
+        while (vdp.lidarHelper.GetLengthOfRecord() > 0)
         {
             ChangeCurrentMove(vdp.lidarHelper.PopNextMove());
             // Debug.Log(GetCurrentMove());
@@ -111,6 +111,8 @@ public class DWACar : VehicleController
             // Get straight movement decision from agent
             vdp.GenerateStraightMovement();
         }*/
+
+        Debug.Log(SelfScale);
     }
 
     public void SetScale(float _scale)

@@ -78,6 +78,7 @@ public class BarController : MonoBehaviour
     private void UpdateSpeed()
     {
         Vehicle.GetComponent<LightCar>().SetScale(0.1f);
+        Vehicle.GetComponent<DWACar>().SetScale(0.05f);
     }
 
     private void ChangeStartPosition()

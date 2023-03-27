@@ -1,6 +1,7 @@
 
 using DecisionMake;
 using System;
+using System.Diagnostics;
 using static DecisionMake.DecisionMaker;
 
 namespace ActionManager
@@ -44,7 +45,7 @@ namespace ActionManager
 
             // Save two side situation into array | No safe check
             Situation[] stateList = { rightState, leftState };
-            // Debug.Log(stateList[0] + ", " + stateList[1]);
+            // UnityEngine.Debug.Log(stateList[0] + ", " + stateList[1]);
 
             SideSituationJudgement(stateList, _leftDis, _rightDis, _isForwardblocked);
         }
@@ -74,7 +75,7 @@ namespace ActionManager
                     return;
                 }
 
-                AddNewRecord(MoveMent.MoveForward);
+                // AddNewRecord(MoveMent.MoveForward);
                 return;
             }
 

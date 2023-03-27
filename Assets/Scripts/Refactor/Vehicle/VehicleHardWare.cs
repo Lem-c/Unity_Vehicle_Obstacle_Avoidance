@@ -11,7 +11,7 @@ public class VehicleHardWare
 
     private int DetectiveLayer;          // The target layer where obstacles located
     private float RayMaxDistance;
-    private float StraightBias = 7.1f;     // Normally the distance estimated ahead is further
+    private float StraightBias = 7.1f;     // Normally the distance estimated ahead is further, decrease
 
     // Default hardware
     LidarDetector StrightLidar;
