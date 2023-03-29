@@ -62,7 +62,7 @@ public abstract class VehicleController : MonoBehaviour
             return;
         }
 
-        currentSpeed = currentSpeed + Time.deltaTime * Acceleration;
+        currentSpeed += Time.deltaTime * Acceleration;
     }
 
     protected void MoveBackward()

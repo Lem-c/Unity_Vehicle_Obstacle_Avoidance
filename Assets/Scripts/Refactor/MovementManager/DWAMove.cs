@@ -12,7 +12,8 @@ public class DWAMove : StepController, DynamicWindow
     // saved angle modified last time
     private float lastAngle;
     private float lastDis = 100f;
-    // The weight list {SpeedWeight, DistanceWeight}
+    private float lastGrade = 0f;
+    // The weight list {SpeedWeight, Distance2DestinationWeight, ObstacleWeight}
     private float[] weightList;
     // Evaluation grades list
     private List<float> evalSet;
@@ -50,20 +51,28 @@ public class DWAMove : StepController, DynamicWindow
     /// </summary>
     public override void TurningDecisionMaker(float _speed, float _angle, float _dis2obs, bool _isClose)
     {
+        if (MovementStep.isAvoiding)
+        {
+            return;
+        }
+
         try {
             if (evalSet.Count >= StepSize && evalSet.Count > 1)
             {
+                UpdateWeight();
                 var tempAngle = angleSet[GetMaxObjectiveInList()];
                 var farObs = distanceSet[GetMaxObjectiveInList()];
                 // Add new movement to avoid obstacles
                 TurningDegreeAdd(tempAngle, farObs, _isClose);
-                // Debug.Log(_isClose);
+                // Update weight value
+                lastGrade = evalSet[GetMaxObjectiveInList()];
 
                 evalSet.Clear();
                 angleSet.Clear();
                 distanceSet.Clear();
 
                 lastDis = farObs;
+                // Debug.Log(weightList[0] + ", " + weightList[1] + ", " + weightList[2]);
                 return;
             }
 
@@ -102,10 +111,25 @@ public class DWAMove : StepController, DynamicWindow
     /****************** Tuning method *************************************/
 
     // TODO
-    // Decrease one when encountered different situation
+    /// <summary>
+    /// Auto adjust the weight according to current situation
+    /// </summary>
     public void UpdateWeight()
     {
-        weightList[0] += 1;
+        if(evalSet[GetMaxObjectiveInList()] >= lastGrade)
+        {
+            if(UnityEngine.Random.Range(-1,2) <= 0){
+                weightList = RandomModifyWeight(weightList, 1, 0.01f);
+            }
+            else
+            {
+                weightList = RandomModifyWeight(weightList, -1, 0.01f);
+            }
+        }
+        else
+        {
+            weightList = RandomWeightGenerate(weightList, 0.05f);
+        }
     }
 
     /// <summary>
@@ -231,6 +255,7 @@ public class DWAMove : StepController, DynamicWindow
 
             if (GetParallelVectorDistance() > 0 && lastAngle > 0)
             {
+                UnityEngine.Debug.Log("Run");
                 // If turn right accounts more weight and prefer to turn right
                 AddNumOfTurning((int)viewAngle, 1);
             }
@@ -296,7 +321,7 @@ public class DWAMove : StepController, DynamicWindow
         if (_angle * _lastAngle > 0)
         {
             var gap = Math.Abs(Math.Abs(_angle) - Math.Abs(_lastAngle));
-            var side = Discriminator(ActiveFunction(_angle));
+            var side = Discriminator(ActiveFunction(_lastAngle));
 
             AddNumOfTurning((int)gap, side);
         }

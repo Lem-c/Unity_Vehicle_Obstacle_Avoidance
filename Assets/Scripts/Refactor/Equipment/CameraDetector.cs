@@ -187,6 +187,11 @@ namespace VehicleEqipment.Camera
                 return true;
             }
 
+            // Re-init
+            if( val >= 3*bestClosestDis){
+                bestClosestDis = 1000f;
+            }
+
             return false;
         }
 

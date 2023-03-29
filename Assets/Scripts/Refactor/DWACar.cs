@@ -102,7 +102,7 @@ public class DWACar : VehicleController
     /// </summary>
     protected override void ProcessDecision()
     {
-        vdp.GenerateStraightMovement();
+        // vdp.GenerateStraightMovement();
         vdp.GenerateTurningMovement();
         // Debug.Log(vdp.stepManager.GetLengthOfRecord());
 
@@ -111,8 +111,6 @@ public class DWACar : VehicleController
             // Get straight movement decision from agent
             vdp.GenerateStraightMovement();
         }*/
-
-        Debug.Log(SelfScale);
     }
 
     public void SetScale(float _scale)

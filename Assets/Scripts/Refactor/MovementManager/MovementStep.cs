@@ -27,7 +27,7 @@ namespace ActionManager
         }
 
         /***********MainDecisionMaker*********/
-        
+        public static bool isAvoiding = false;
 
         /***********Memories******************/
         // Predicted next movement record list
@@ -66,6 +66,12 @@ namespace ActionManager
             if (GetLengthOfRecord() > 2 && nextMove==MoveMent.MoveForward)
             {
                 RefreshRecord();
+                return;
+            }
+
+            // Avoid too much actions
+            if(GetLengthOfRecord() > 20)
+            {
                 return;
             }
 

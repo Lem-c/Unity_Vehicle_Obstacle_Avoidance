@@ -5,6 +5,7 @@ namespace ActionManager
     /// <summary>
     /// The movement controller with factory move pattern generator
     /// Gudie the vehicle mevement
+    /// Used as util class with assist static methods
     /// Inherit from : MovementStep (step manager)
     /// </summary>
     public class StepController : MovementStep
@@ -80,6 +81,79 @@ namespace ActionManager
                     return null;
 
             }
+        }
+
+        /// <summary>
+        /// Generate a different weight list according to an old one
+        /// Increas/Decrease a random float value in [0,1]
+        /// </summary>
+        /// <param name="_oldWeight">Input weight list</param>
+        /// <param name="_upper">Maximum change can be made to a value</param>
+        /// <returns>new weight list</returns>
+        /// <exception cref="Exception">If input is null or too short</exception>
+        public static float[] RandomWeightGenerate(float[] _oldWeight, float _upper=0.05f)
+        {
+            if(_oldWeight == null || _oldWeight.Length < 2)
+            {
+                throw new Exception("Data fetch failure:Length");
+            }
+
+            float[] newWeight = _oldWeight;
+
+            for(int i=0; i < newWeight.Length; i++)
+            {
+                var bias = UnityEngine.Random.Range(0.0f, _upper);
+                var additive = UnityEngine.Random.Range(-1, 2);
+
+                newWeight[i] = _oldWeight[i] + bias * additive;
+            }
+
+            return newWeight;
+        }
+
+        /// <summary>
+        /// Generate a new weight according to the value of '_sign'
+        /// Increase or decrease a random value to old weight
+        /// </summary>
+        /// <param name="_oldWeight">Input weight list</param>
+        /// <param name="_sign">Whether decrease or increase</param>
+        /// <param name="_upper">Maximum change can be made to a value</param>
+        /// <returns></returns>
+        /// <exception cref="Exception">If input is null or too short</exception>
+        public static float[] RandomModifyWeight(float[] _oldWeight, float _sign=1, float _upper=1f) {
+            if (_oldWeight == null || _oldWeight.Length < 2)
+            {
+                throw new Exception("Data fetch failure:Length");
+            }
+
+            if (CheckIsOverfit(_oldWeight, 1.5f))
+            {
+                return _oldWeight;
+            }
+
+            float[] newWeight = _oldWeight;
+
+            for (int i = 0; i < newWeight.Length; i++)
+            {
+                var bias = UnityEngine.Random.Range(0.0f, _upper);
+
+                newWeight[i] = _oldWeight[i] + bias * _sign;
+            }
+
+            return newWeight;
+        }
+
+        public static bool CheckIsOverfit(float[] _tar, float _root = 1f)
+        {
+            for (int i = 0; i < _tar.Length; i++)
+            {
+                if (Math.Abs(_tar[i]) > _root)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /********************Debug methods****************************/

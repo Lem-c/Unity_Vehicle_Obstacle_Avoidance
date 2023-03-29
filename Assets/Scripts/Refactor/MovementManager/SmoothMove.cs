@@ -47,6 +47,15 @@ namespace ActionManager
             Situation[] stateList = { rightState, leftState };
             // UnityEngine.Debug.Log(stateList[0] + ", " + stateList[1]);
 
+            if(rightState == Situation.Dangerous || leftState == Situation.Dangerous)
+            {
+                MovementStep.isAvoiding = true;
+            }
+            else
+            {
+                MovementStep.isAvoiding = false;
+            }
+
             SideSituationJudgement(stateList, _leftDis, _rightDis, _isForwardblocked);
         }
 
