@@ -1,3 +1,4 @@
+using ActionManager;
 using MathNet.Numerics.LinearAlgebra.Single;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ public class VehicleHardWare
 
     private int DetectiveLayer;          // The target layer where obstacles located
     private float RayMaxDistance;
-    private float StraightBias = 7.1f;     // Normally the distance estimated ahead is further, decrease
+    private float StraightBias = 7.1f;   // Normally the distance estimated ahead is further, decrease
 
     // Default hardware
     LidarDetector StrightLidar;
@@ -19,6 +20,9 @@ public class VehicleHardWare
     LidarDetector RightLidar;
     
     CameraDetector UpperCamera;
+
+    // camera weight list
+    private float[] weightList = { 0.25f, 0.333f };
 
 
     public VehicleHardWare(GameObject _target, float _rayDistance, int _detectiveLayer)
@@ -35,7 +39,7 @@ public class VehicleHardWare
         StrightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance);
         LeftLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
         RightLidar = new LidarDetector(DetectiveLayer, RayMaxDistance - StraightBias, 20);
-        UpperCamera = new CameraDetector(_target, DetectiveLayer, _rayDistance, 25);
+        UpperCamera = new CameraDetector(_target, DetectiveLayer, RayMaxDistance, 25);
     }
 
     /**************** Lidar detection methods **********************/
@@ -67,9 +71,11 @@ public class VehicleHardWare
     {
         var cam = GameObject.FindWithTag("SceneView").GetComponent<Camera>();
         var isClosing_ = false;
-        UpperCamera.ProcessCamera(cam, 0.3f, 0.35f, ref isClosing_);                 // Set weight for angle and distance
-
-        // Debug.Log(isClosing_);
+        // process camera detection
+        UpperCamera.ProcessCamera(cam, weightList[0], weightList[1], ref isClosing_);  
+        // Random set weight for angle and distance
+        weightList=StepController.RandomModifyWeight(weightList, UnityEngine.Random.Range(-1,2), 0.001f);
+        Debug.Log(weightList[0] + ", " + weightList[1]);
 
         return isClosing_;
     }

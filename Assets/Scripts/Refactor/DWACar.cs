@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 public class DWACar : VehicleController
 {
     // Key device params
-    private readonly float MaxRayDistance = 13f;
+    private readonly float MaxRayDistance = 15f;
     public Dashboard dashboard;
 
 
@@ -15,7 +15,7 @@ public class DWACar : VehicleController
         Vehicle = GameObject.FindWithTag("Player");
         dashboard = new Dashboard();
 
-        float[] tempWeight = { 0.094f, 0.13f, 0.11f };
+        float[] tempWeight = { 0.094f, 0.13f, 0.6f };
         /**
          * Remember to adjust the camera weight either
          */
@@ -37,6 +37,7 @@ public class DWACar : VehicleController
         // Speed value Monitor
         dashboard.Speed = GetCurrentSpeed();
         dashboard.NowBreak = GetCurrentDeceleration();
+        // Debug.Log(GetCurrentSpeed());
     }
 
     void FixedUpdate()

@@ -52,6 +52,8 @@ namespace DecisionMake
             Fuzzyfication(_currentSpeed, _currentDis);
             // Debug.Log(GetWeightedAverage());
             // Calculate average weight sum and get Situation
+
+            // TODO: explain the reason of randomlization: compare
             var state = ActivateFunction( GetWeightedAverage(), _threshlod);
 
             return state;

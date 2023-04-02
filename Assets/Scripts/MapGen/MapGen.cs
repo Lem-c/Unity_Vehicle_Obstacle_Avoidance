@@ -102,6 +102,7 @@ public class MapGen
                         Material mat = Resources.Load<Material>("Mat/Wall");
                         cube.GetComponent<Renderer>().material = mat;
                         // Change cube layer => Obstacles
+                        cube.layer = LayerMask.NameToLayer("Obstacles");
                         /*cube.layer = LayerMask.NameToLayer("MapBoundary");*/
                     }
                     // Coordinate of cube: (-(map_row_max_cells / 2) + i, (float)0.5 + k, -(map_Collections.Count / 2) + j)

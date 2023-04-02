@@ -28,6 +28,7 @@ namespace ActionManager
 
         /***********MainDecisionMaker*********/
         public static bool isAvoiding = false;
+        public static bool isLongWall = false;
 
         /***********Memories******************/
         // Predicted next movement record list
@@ -70,10 +71,10 @@ namespace ActionManager
             }
 
             // Avoid too much actions
-            if(GetLengthOfRecord() > 20)
+/*            if(GetLengthOfRecord() > StepSize)
             {
                 return;
-            }
+            }*/
 
             RecordSteps.Add(_step);
         }
@@ -166,6 +167,30 @@ namespace ActionManager
             }
 
             AddNewRecord(MoveMent.TurnRight);
+        }
+
+        /// <summary>
+        /// Do turning in given times
+        /// </summary>
+        /// <param name="_time">how many times an action would be genertaed</param>
+        /// <param name="_side">turn side: {1,-1}</param>
+        public void AddNumOfTurning(int _time, int _side)
+        {
+            var count = _time;                              // How many times an instruction would be added
+
+            while (count > 0)
+            {
+                if (_side > 0)
+                {
+                    AddNewRecord(MoveMent.TurnRight);
+                }
+                else if (_side < 0)
+                {
+                    AddNewRecord(MoveMent.TurnLeft);
+                }
+
+                count--;
+            }
         }
     }
 }

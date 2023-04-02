@@ -51,21 +51,21 @@ public class DWAMove : StepController, DynamicWindow
     /// </summary>
     public override void TurningDecisionMaker(float _speed, float _angle, float _dis2obs, bool _isClose)
     {
-        if (MovementStep.isAvoiding)
-        {
-            return;
-        }
 
         try {
             if (evalSet.Count >= StepSize && evalSet.Count > 1)
             {
-                UpdateWeight();
+                UpdateWeight(0.002f);
                 var tempAngle = angleSet[GetMaxObjectiveInList()];
                 var farObs = distanceSet[GetMaxObjectiveInList()];
                 // Add new movement to avoid obstacles
                 TurningDegreeAdd(tempAngle, farObs, _isClose);
+                // Debug.Log(evalSet[GetMaxObjectiveInList()] + ", " + farObs + ", " + tempAngle);
+
                 // Update weight value
                 lastGrade = evalSet[GetMaxObjectiveInList()];
+                // update last record angle
+                lastAngle = tempAngle;
 
                 evalSet.Clear();
                 angleSet.Clear();
@@ -114,21 +114,21 @@ public class DWAMove : StepController, DynamicWindow
     /// <summary>
     /// Auto adjust the weight according to current situation
     /// </summary>
-    public void UpdateWeight()
+    public void UpdateWeight(float _stepSize = 0.001f)
     {
         if(evalSet[GetMaxObjectiveInList()] >= lastGrade)
         {
             if(UnityEngine.Random.Range(-1,2) <= 0){
-                weightList = RandomModifyWeight(weightList, 1, 0.01f);
+                weightList = RandomModifyWeight(weightList, 1, _stepSize);
             }
             else
             {
-                weightList = RandomModifyWeight(weightList, -1, 0.01f);
+                weightList = RandomModifyWeight(weightList, -1, _stepSize);
             }
         }
         else
         {
-            weightList = RandomWeightGenerate(weightList, 0.05f);
+            weightList = RandomWeightGenerate(weightList, _stepSize/10);
         }
     }
 
@@ -171,9 +171,7 @@ public class DWAMove : StepController, DynamicWindow
 
         // Evaluate whether move towards to the destination
         result += (float)gap * _weight * Discriminator(_isClose);
-
-        // update angle
-        lastAngle = _angle;                                         
+                                         
         return result;
     }
 
@@ -181,7 +179,7 @@ public class DWAMove : StepController, DynamicWindow
     {
         if(_dis2obs < 0)
         {
-            return 10 * _bias;                                     // Add as compensation
+            return Math.Abs(100 * _bias);                                     // Add as compensation
         }
 
         return -_bias * (float)Math.Pow(_dis2obs/10,2) + MaxDecisionBias*10;
@@ -221,6 +219,8 @@ public class DWAMove : StepController, DynamicWindow
     {
         var viewAngle = Math.Abs(_angle/10)+1;
 
+        // Debug.Log(degree: " + viewAngle);
+
         if(_isClosing)
         {
             if (lastDis - _dis2obs <= 0)
@@ -253,38 +253,20 @@ public class DWAMove : StepController, DynamicWindow
             // check same direction and compare angle
             RecoverAngle(_angle, lastAngle);
 
-            if (GetParallelVectorDistance() > 0 && lastAngle > 0)
+            viewAngle = Math.Abs(lastAngle / 10) + 1;
+            if (GetParallelVectorDistance(10) > 0 && lastAngle > 0)
             {
-                UnityEngine.Debug.Log("Run");
                 // If turn right accounts more weight and prefer to turn right
                 AddNumOfTurning((int)viewAngle, 1);
             }
-            else if(GetParallelVectorDistance() <= 0 && lastAngle < 0)
+            else if(GetParallelVectorDistance(10) <= 0 && lastAngle < 0)
             {
                 // If turn left accounts more weight and prefer to turn left
                 AddNumOfTurning((int)viewAngle, -1);
             }
         }
     }
-
-    private void AddNumOfTurning(int _time, int _side)
-    {
-        var count = _time;                              // How many times an instruction would be added
-
-        while(count > 0)
-        {
-            if(_side > 0)
-            {
-                AddNewRecord(MoveMent.TurnRight);
-            }
-            else if(_side < 0)
-            {
-                AddNewRecord(MoveMent.TurnLeft);
-            }
-
-            count--;
-        }
-    }
+ 
 
     /// <summary>
     /// Generate two vectors from left and right side of vehicle
@@ -316,6 +298,11 @@ public class DWAMove : StepController, DynamicWindow
         return L_dis - R_dis;
     }
 
+    /// <summary>
+    /// When the robot apperas to diverge, force back to last angle
+    /// </summary>
+    /// <param name="_angle"></param>
+    /// <param name="_lastAngle"></param>
     private void RecoverAngle(float _angle, float _lastAngle)
     {
         if (_angle * _lastAngle > 0)
@@ -323,15 +310,21 @@ public class DWAMove : StepController, DynamicWindow
             var gap = Math.Abs(Math.Abs(_angle) - Math.Abs(_lastAngle));
             var side = Discriminator(ActiveFunction(_lastAngle));
 
-            AddNumOfTurning((int)gap, side);
+            AddNumOfTurning((int)gap+1, side);
         }
         // if opposite sign (differet side)
         else
         {
-            var gap = Mathf.Abs(_angle) + Mathf.Abs(_lastAngle);
-            var side = Discriminator(ActiveFunction(_lastAngle));
-
-            AddNumOfTurning((int)gap, -side);
+            if(_lastAngle<0)
+            {
+                var gap = Mathf.Abs(_angle) + Mathf.Abs(_lastAngle);
+                AddNumOfTurning((int)gap, -1);
+            }
+            else
+            {
+                var gap = Mathf.Abs(_angle + _lastAngle);
+                AddNumOfTurning((int)gap, 1);
+            }
         }
     }
 

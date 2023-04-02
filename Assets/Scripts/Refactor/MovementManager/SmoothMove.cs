@@ -47,13 +47,18 @@ namespace ActionManager
             Situation[] stateList = { rightState, leftState };
             // UnityEngine.Debug.Log(stateList[0] + ", " + stateList[1]);
 
+            // Change system state
             if(rightState == Situation.Dangerous || leftState == Situation.Dangerous)
             {
                 MovementStep.isAvoiding = true;
             }
-            else
+            else if(rightState == Situation.Safe && leftState == Situation.Safe)
             {
                 MovementStep.isAvoiding = false;
+                if (rightState != Situation.Dangerous || leftState != Situation.Dangerous)
+                {
+                    MovementStep.isLongWall= false;
+                }
             }
 
             SideSituationJudgement(stateList, _leftDis, _rightDis, _isForwardblocked);
@@ -84,7 +89,7 @@ namespace ActionManager
                     return;
                 }
 
-                // AddNewRecord(MoveMent.MoveForward);
+                AddNewRecord(MoveMent.MoveForward);
                 return;
             }
 
@@ -111,6 +116,15 @@ namespace ActionManager
                 AddNewRecord(MoveMent.TurnRight);
 
                 return;
+            }
+
+            // Handle long obstacle
+            if (StepController.IsTwoFloatValueSimilar(_left, _right, 0.1f))
+            {
+                MovementStep.isLongWall=true;
+                var direction = UnityEngine.Random.Range(0, 2);
+                int[] sideArray = { -1, 1 };
+                AddNumOfTurning(10, sideArray[direction]);
             }
         }
 

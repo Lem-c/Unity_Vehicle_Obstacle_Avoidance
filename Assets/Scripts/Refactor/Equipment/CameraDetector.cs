@@ -10,6 +10,7 @@ namespace VehicleEqipment.Camera
         // Recorder
         float lastAngle = 360f;
         float bestClosestDis = 1000f;
+        float recoverCount = 20;
 
         public static GameObject Target;                  // The object where camera would be installed
         public static Vector3 destination;                         // The target destination
@@ -188,10 +189,12 @@ namespace VehicleEqipment.Camera
             }
 
             // Re-init
-            if( val >= 3*bestClosestDis){
+            if( recoverCount<=0){
                 bestClosestDis = 1000f;
+                recoverCount = 10;
             }
 
+            recoverCount--;
             return false;
         }
 
@@ -217,7 +220,7 @@ namespace VehicleEqipment.Camera
             }
 
             // The rotation temporary variables
-            float currentBias = UnityEngine.Random.Range(5f, 20f);
+            float currentBias = UnityEngine.Random.Range(3f, 22f);
             float tempBias = 0;
 
             Vector3 tempDirection;
@@ -236,14 +239,17 @@ namespace VehicleEqipment.Camera
                 // Add 'tempBias' to the y-axis
                 tempDirection = Quaternion.Euler(0, tempBias, 0) *
                                 _target.TransformDirection(Vector3.forward);
-                          
+
+                // Detection result
+                RayDetection(_target.position, tempDirection);
+
                 // Add distacen into the lists
                 obsDistanceMap.Add(new List<float> {
                     tempBias,
                     DistanceTo()
                 });
 
-                DrawRay(_target.position, tempDirection, UnityEngine.Color.green);
+                DrawRay(_target.position, tempDirection, UnityEngine.Color.blue);
 
                 activateTimes += 1;
             }

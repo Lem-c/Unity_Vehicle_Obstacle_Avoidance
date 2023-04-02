@@ -126,7 +126,7 @@ namespace ActionManager
                 throw new Exception("Data fetch failure:Length");
             }
 
-            if (CheckIsOverfit(_oldWeight, 1.5f))
+            if (CheckIsOverfit(_oldWeight, 0.75f))
             {
                 return _oldWeight;
             }
@@ -136,15 +136,27 @@ namespace ActionManager
             for (int i = 0; i < newWeight.Length; i++)
             {
                 var bias = UnityEngine.Random.Range(0.0f, _upper);
+                // salt mis-direction
+                var noise = UnityEngine.Random.Range(-1, 2);
+                if (noise == 0) { noise= 1; }
 
-                newWeight[i] = _oldWeight[i] + bias * _sign;
+                newWeight[i] = _oldWeight[i] + bias * _sign * noise;
             }
 
             return newWeight;
         }
 
+        /// <summary>
+        /// Check whether a parameter in weight list is overfit
+        /// </summary>
+        /// <param name="_tar">Target weight list</param>
+        /// <param name="_root">threshold value</param>
+        /// <returns>bool</returns>
         public static bool CheckIsOverfit(float[] _tar, float _root = 1f)
         {
+            // Check destination weight can't less than zero
+            if (_tar[1] <= 0.005f) { return true; }
+
             for (int i = 0; i < _tar.Length; i++)
             {
                 if (Math.Abs(_tar[i]) > _root)

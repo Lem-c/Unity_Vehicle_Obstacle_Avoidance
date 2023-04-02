@@ -23,6 +23,7 @@ public class VecicleDecisionPlatform
                                    float _startAngle = 0, float[] _weight = null)
     {
         Target = _car;
+        // connect to hardware
         motherBoard = new VehicleHardWare(Target, _maxRayDistance, _layer);
         // TODO: Exchange this as switchable/decleared parameter
         sensorType = _DType;
@@ -86,7 +87,7 @@ public class VecicleDecisionPlatform
                                              motherBoard.GetIsForwardBlocked());
 
             // Process camera sensor => is close to the target
-            var state = motherBoard.CameraDetect();
+            var closingState = motherBoard.CameraDetect();
 
             // Generate decisions
             stepManager.SetStepSize(motherBoard.GetLengthOfCameraData());   // Update the windows size
@@ -105,7 +106,7 @@ public class VecicleDecisionPlatform
 
                 // Process DM to add data into lists
                 stepManager.TurningDecisionMaker(Target.GetComponent<DWACar>().GetCurrentSpeed(),
-                                                data[0], data[1], state);
+                                                data[0], data[1], closingState);
                 // stepManager.PrintMessage();
             }
 

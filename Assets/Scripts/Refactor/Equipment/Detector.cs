@@ -11,7 +11,7 @@ namespace VehicleEqipment
         protected int LayerMask { set; get; }
         protected float MaxRayDistance { set; get; }
         // Changing variables
-        protected float angleBias_y { set; get; }  // The rotation on y-axis [Have to greater than zero, rotation angle]
+        protected float angleBias_y { set; get; }  // The rotation on z-axis [Have to greater than zero, rotation angle]
         protected float tempAngle { set; get; }   // Save radar rotation angle
 
 
