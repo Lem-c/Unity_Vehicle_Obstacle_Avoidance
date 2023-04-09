@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class DrawRealTimePath : DrawPen
 {
+    int count = 0;
+
     void Awake()
     {
         DefaultSetup();
@@ -18,10 +20,15 @@ public class DrawRealTimePath : DrawPen
         // Care about the script that binded with Vehicle object 
         if (StateCheck())
         {
-            AddNewPoint(Vehicle.GetComponent<Transform>().position);
+            if (count > 2)
+            {
+                AddNewPoint(Vehicle.GetComponent<Transform>().position);
+                count = 0;
+            }
 
             // Update points of lineRanderer
             DrawLine();
+            count += 1;
         }
     }
 }

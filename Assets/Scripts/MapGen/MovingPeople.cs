@@ -6,13 +6,13 @@ public class MovingPeople : MonoBehaviour
 {
     // Start is called before the first frame update
     Transform[] movingPeopleList;
-    void Start()
+/*    void Start()
     {
         movingPeopleList = GetComponentsInChildren<Transform>();
-    }
+    }*/
 
     // Update is called once per frame
-    private void FixedUpdate()
+/*    private void FixedUpdate()
     {
         int count = 0;
 
@@ -31,7 +31,7 @@ public class MovingPeople : MonoBehaviour
 
             count++;
         }
-    }
+    }*/
 
     private void RandomMoving(Transform _obj, int _side=1)
     {

@@ -53,6 +53,7 @@ public class DWAMove : StepController, DynamicWindow
     {
 
         try {
+            // Get best
             if (evalSet.Count >= StepSize && evalSet.Count > 1)
             {
                 UpdateWeight(0.002f);
@@ -73,6 +74,7 @@ public class DWAMove : StepController, DynamicWindow
 
                 lastDis = farObs;
                 // Debug.Log(weightList[0] + ", " + weightList[1] + ", " + weightList[2]);
+                DWACar.costCount += 1;
                 return;
             }
 
@@ -116,9 +118,10 @@ public class DWAMove : StepController, DynamicWindow
     /// </summary>
     public void UpdateWeight(float _stepSize = 0.001f)
     {
-        if(evalSet[GetMaxObjectiveInList()] >= lastGrade)
+        if (evalSet[GetMaxObjectiveInList()] >= lastGrade)
         {
-            if(UnityEngine.Random.Range(-1,2) <= 0){
+            if (UnityEngine.Random.Range(-1, 3) <= 0)
+            {
                 weightList = RandomModifyWeight(weightList, 1, _stepSize);
             }
             else
@@ -128,7 +131,7 @@ public class DWAMove : StepController, DynamicWindow
         }
         else
         {
-            weightList = RandomWeightGenerate(weightList, _stepSize/10);
+            weightList = RandomWeightGenerate(weightList, _stepSize / 10);
         }
     }
 
@@ -217,13 +220,14 @@ public class DWAMove : StepController, DynamicWindow
     /// <param name="_angle">Selected angle with heighest objective value</param>
     private void TurningDegreeAdd(float _angle, float _dis2obs=0, bool _isClosing=false)
     {
-        var viewAngle = Math.Abs(_angle/10)+1;
+        var viewAngle = Math.Abs(_angle/10);
 
         // Debug.Log(degree: " + viewAngle);
 
         if(_isClosing)
         {
-            if (lastDis - _dis2obs <= 0)
+            if (lastDis - _dis2obs <= 0 &&
+                IsTwoFloatValueSimilar(_angle, lastAngle, 0.1f))
             {
                 // Moving close to the target: Straight || No obstacle
                 AddNewRecord(MoveMent.MoveForward);

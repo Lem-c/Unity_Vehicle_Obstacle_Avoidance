@@ -13,7 +13,7 @@ namespace VehicleEqipment.Camera
         float recoverCount = 20;
 
         public static GameObject Target;                  // The object where camera would be installed
-        public static Vector3 destination;                         // The target destination
+        public static Vector3 destination;                // The target destination
 
         // List recording all distances measured to obstalces
         private List<List<float>> obsDistanceMap;
@@ -140,7 +140,7 @@ namespace VehicleEqipment.Camera
         public void LerpUpdate(UnityEngine.Camera _cam)
         {
             lastAngle = CalculateAngle(Target.GetComponent<Transform>().position, destination);
-
+            StopVehicleWhenArrive();
             UpdateDestination(_cam);
             AddDistance2ObsIntoList();
         }
@@ -285,6 +285,24 @@ namespace VehicleEqipment.Camera
                 {
                     var cube = GameObject.FindWithTag("MousePoint");
                     cube.transform.position = destination;
+
+                    // TODO: Can not be executed because the pause state 
+                    if (!Target.GetComponent<DWACar>().GetCurrentState())
+                    {
+                        Target.GetComponent<DWACar>().ChangeStartState();
+                    }
+                }
+            }
+        }
+
+        private void StopVehicleWhenArrive()
+        {
+            if(Target.GetComponent<DWACar>() != null)
+            {
+                if(IsTwoPointsClose(Target.transform.position, destination, 1.5f))
+                {
+                    Debug.Log(DWACar.costCount + ", " + DWACar.routeLength);
+                    Target.GetComponent<DWACar>().ChangeStartState();
                 }
             }
         }
@@ -329,6 +347,33 @@ namespace VehicleEqipment.Camera
         public static Vector3 GetVectorFromTwoPoint(float[] _from, float[] _to)
         {
             return new Vector3(_from[0] - _to[0], 0, _from[1] - _to[1]);
+        }
+
+        /// <summary>
+        /// Check whether 2 2D points are close to each other
+        /// </summary>
+        /// <param name="_f">first point</param>
+        /// <param name="_t">second point</param>
+        /// <param name="_threshold">Determine bias</param>
+        /// <returns>bool: is close to</returns>
+        public static bool IsTwoPointsClose(Vector3 _f, Vector3 _t, float _threshold)
+        {
+            // Not same direction
+            if(_f.x * _t.x < 0 || _f.z*_t.z < 0)
+            {
+                return false;
+            }
+
+
+            if(Math.Abs(Math.Abs(_f.x) - Math.Abs(_t.x)) < _threshold)
+            {
+                if(Math.Abs(Math.Abs(_f.z) - Math.Abs(_t.z)) < _threshold)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

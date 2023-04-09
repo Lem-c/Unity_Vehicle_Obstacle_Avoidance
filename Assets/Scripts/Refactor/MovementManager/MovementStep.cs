@@ -71,7 +71,7 @@ namespace ActionManager
             }
 
             // Avoid too much actions
-/*            if(GetLengthOfRecord() > StepSize)
+/*            if (GetLengthOfRecord() > StepSize)
             {
                 return;
             }*/

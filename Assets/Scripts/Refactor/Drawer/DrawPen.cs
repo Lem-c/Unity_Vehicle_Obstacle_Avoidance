@@ -18,6 +18,9 @@ public class DrawPen : MonoBehaviour
     protected GameObject Vehicle;
     protected GameObject pen;
 
+    // state tracker
+    private bool canDraw = false;
+
     /// <summary>
     /// The default construction of parameters
     /// </summary>
@@ -42,9 +45,11 @@ public class DrawPen : MonoBehaviour
     {
         if(pointList.Count < 4)
         {
+            canDraw = false;
             return;
         }
 
+        canDraw= true;
         line.positionCount = lineList.Count;
         lineList.Add(bezier.formula(pointList, 0.1f));
         line.SetPositions(lineList.ToArray());
@@ -93,5 +98,12 @@ public class DrawPen : MonoBehaviour
         }
 
         return false;
+    }
+
+    protected bool IsFinishDrawing()
+    {
+        if(canDraw) { return false; }
+
+        return true;
     }
 }

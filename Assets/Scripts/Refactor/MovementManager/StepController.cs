@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace ActionManager
 {
@@ -143,6 +144,8 @@ namespace ActionManager
                 newWeight[i] = _oldWeight[i] + bias * _sign * noise;
             }
 
+            // UnityEngine.Debug.Log("New: " + newWeight[0] + ", " + newWeight[1] + ", " + newWeight[2]);
+
             return newWeight;
         }
 
@@ -155,7 +158,7 @@ namespace ActionManager
         public static bool CheckIsOverfit(float[] _tar, float _root = 1f)
         {
             // Check destination weight can't less than zero
-            if (_tar[1] <= 0.005f) { return true; }
+            if (_tar[1] <= 0.003f) { return true; }
 
             for (int i = 0; i < _tar.Length; i++)
             {

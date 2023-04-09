@@ -92,7 +92,7 @@ public class MapGen
                     // Change material and layer of cube
                     if (cube_num != 2)
                     {
-                        Material mat = Resources.Load<Material>("Mat/Floar");
+                        Material mat = Resources.Load<Material>("Mat/Wall");
                         cube.GetComponent<Renderer>().material = mat;
                         // Change cube layer => Obstacles
                         cube.layer = LayerMask.NameToLayer("Obstacles");

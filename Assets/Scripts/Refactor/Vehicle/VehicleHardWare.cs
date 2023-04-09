@@ -74,8 +74,8 @@ public class VehicleHardWare
         // process camera detection
         UpperCamera.ProcessCamera(cam, weightList[0], weightList[1], ref isClosing_);  
         // Random set weight for angle and distance
-        weightList=StepController.RandomModifyWeight(weightList, UnityEngine.Random.Range(-1,2), 0.001f);
-        Debug.Log(weightList[0] + ", " + weightList[1]);
+        // weightList=StepController.RandomModifyWeight(weightList, UnityEngine.Random.Range(-1,2), 0.001f);
+        // Debug.Log(weightList[0] + ", " + weightList[1]);
 
         return isClosing_;
     }

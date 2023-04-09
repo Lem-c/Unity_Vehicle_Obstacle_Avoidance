@@ -24,7 +24,14 @@ namespace VehicleEqipment
         public void SetParameters(int _layer, float _rayDistance, float _sideVisualAngle = 0)
         {
             LayerMask = _layer;
-            MaxRayDistance = _rayDistance;
+            if (_rayDistance > 0)
+            {
+                MaxRayDistance = _rayDistance;
+            }
+            else
+            {
+                MaxRayDistance = 1f;
+            }
             angleBias_y = _sideVisualAngle;
 
             tempAngle = angleBias_y;

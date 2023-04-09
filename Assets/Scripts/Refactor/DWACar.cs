@@ -4,9 +4,14 @@ using UnityEngine.SceneManagement;
 public class DWACar : VehicleController
 {
     // Key device params
-    private readonly float MaxRayDistance = 15f;
+    private readonly float MaxRayDistance = 9f;
     public Dashboard dashboard;
 
+    public static int costCount = 0;
+    public static float routeLength = 0;
+
+    // Counter obj
+    public DistanceMeasure dm;
 
     /******************Unity methods************************/
     // Start is called before the first frame update
@@ -14,8 +19,10 @@ public class DWACar : VehicleController
     {
         Vehicle = GameObject.FindWithTag("Player");
         dashboard = new Dashboard();
+        dm = new DistanceMeasure(Vehicle, 1f);
 
-        float[] tempWeight = { 0.094f, 0.13f, 0.6f };
+        // float[] tempWeight = { 0.094f, 0.13f, 0.6f };
+        float[] tempWeight = { 1.333f, 2,657, 3,123f };
         /**
          * Remember to adjust the camera weight either
          */
@@ -33,6 +40,8 @@ public class DWACar : VehicleController
         QueueCommandOperation();
         // Call op to realize movement
         Operation();
+        // Generate decisions
+        ProcessDecision();
 
         // Speed value Monitor
         dashboard.Speed = GetCurrentSpeed();
@@ -44,7 +53,9 @@ public class DWACar : VehicleController
     {
         if (isStart_)
         {
-            ProcessDecision();
+            // data
+            dm.UpdateDistance();
+            routeLength = dm.GetMoveDistance();
         }
     }
 
@@ -103,6 +114,8 @@ public class DWACar : VehicleController
     /// </summary>
     protected override void ProcessDecision()
     {
+        if (!isStart_) { return; }
+
         // vdp.GenerateStraightMovement();
         vdp.GenerateTurningMovement();
         // Debug.Log(vdp.stepManager.GetLengthOfRecord());
